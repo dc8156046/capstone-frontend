@@ -86,7 +86,13 @@ export default function UserList() {
       setUsers((prev) => [...prev, data]);
     }
     setIsAddDialogOpen(false);
-    setFormData({ username: "", email: "", password: "", role: "user" });
+    setFormData({
+      first_name: "",
+      last_name: "",
+      email: "",
+      password: "",
+      role: "user",
+    });
   };
 
   // Update user
