@@ -1,5 +1,6 @@
 "use client";
 
+import CONFIG from "./config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,13 +48,16 @@ export default function Home() {
     }
     setLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/auth/admin/token`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: `username=${email}&password=${password}`,
-      });
+      const response = await fetch(
+        `https://brickbyclick-backend-production.up.railway.app/auth/token`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: `username=${email}&password=${password}`,
+        }
+      );
       if (response.ok) {
         const data = await response.json();
 
