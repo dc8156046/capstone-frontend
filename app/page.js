@@ -1,6 +1,5 @@
 "use client";
 
-import CONFIG from "./config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,12 +13,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { userAPI } from "@/services";
 
 export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
   const router = useRouter();
 
   useEffect(() => {
@@ -48,46 +48,14 @@ export default function Home() {
     }
     setLoading(true);
     try {
-      const response = await fetch(
-        `https://brickbyclick-backend-production.up.railway.app/auth/token`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: `username=${email}&password=${password}`,
-        }
-      );
-      if (response.ok) {
-        const data = await response.json();
-
-        if (typeof window !== "undefined") {
-          localStorage.setItem("token", data.access_token);
-          localStorage.setItem("email", email);
-          localStorage.setItem("username", data.username);
-        }
-        alert("Login successful");
-        router.push("/dashboard");
-      } else {
-        if (response.status === 401) {
-          alert("Invalid email or password");
-        }
-        if (response.status === 500) {
-          alert("Internal server error");
-        }
-        if (response.status === 400) {
-          alert("Bad request");
-        }
-        if (response.status === 403) {
-          alert("Forbidden");
-        }
-        if (response.status === 404) {
-          alert("Not found");
-        }
-        if (response.status === 422) {
-          alert("Unprocessable entity");
-        }
+      const response = await userAPI.login(email, password);
+      //console.log(response);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", response.access_token);
+        localStorage.setItem("email", email);
       }
+      alert("Login successful");
+      router.push("/dashboard");
     } catch (error) {
       console.error(error);
     }

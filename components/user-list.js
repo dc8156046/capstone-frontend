@@ -13,21 +13,16 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Pencil, Trash2, UserPlus } from "lucide-react";
+import { userAPI } from "@/services";
 
 export default function UserList() {
   const [users, setUsers] = useState([]);
 
   const fetchUsers = async () => {
-    const response = await fetch(
-      "https://brickbyclick-backend-production.up.railway.app/users/",
-      {
-        method: "GET",
-      }
-    );
-    if (response.ok) {
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setUsers(data);
+    const response = await userAPI.getUsers();
+    if (response) {
+      if (Array.isArray(response)) {
+        setUsers(response);
       } else {
         setUsers([]);
       }
@@ -70,20 +65,9 @@ export default function UserList() {
     formData.last_name = lastname;
     formData.email = email;
     formData.password = password;
-    const response = await fetch(
-      "https://brickbyclick-backend-production.up.railway.app/users/",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formData),
-      }
-    );
-    if (response.ok) {
-      const data = await response.json();
-      setUsers((prev) => [...prev, data]);
+    const response = await userAPI.addUser(formData);
+    if (response) {
+      setUsers((prev) => [...prev, response]);
     }
     setIsAddDialogOpen(false);
     setFormData({
@@ -99,20 +83,8 @@ export default function UserList() {
   const handleUpdateUser = async (e) => {
     e.preventDefault();
 
-    const updatedUser = await fetch(
-      `
-      https://brickbyclick-backend-production.up.railway.app/users/${currentUser.id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formData),
-      }
-    );
-    if (updatedUser.ok) {
-      const data = await updatedUser.json();
+    const data = await userAPI.updateUser(currentUser.id, formData);
+    if (data) {
       const updatedUsers = users.map((user) =>
         user.id === data.id ? data : user
       );
@@ -126,16 +98,8 @@ export default function UserList() {
   // Delete user
   const handleDeleteUser = async (userId) => {
     if (!confirm("Are you sure you want to delete this user?")) return;
-    const response = await fetch(
-      `https://brickbyclick-backend-production.up.railway.app/users/${userId}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (!response.ok) {
+    const response = await userAPI.deleteUser(userId);
+    if (!response) {
       alert("Failed to delete user");
       return;
     }
