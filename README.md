@@ -75,7 +75,6 @@ The project follows a standard Next.js structure with additional configuration f
 ├── lib/             # Utility functions
 ├── services/        # Backend api request and response services
 ├── public/          # Static assets (images, icons, etc.)
-├── src/
 ├── tailwind.config.js   # TailwindCSS configuration
 ├── postcss.config.js    # PostCSS configuration
 ├── next.config.js       # Next.js configuration
