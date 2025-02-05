@@ -1,12 +1,7 @@
-"use client"
+"use client";
 
-import React, { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,81 +12,109 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Pencil, Trash2, UserPlus } from 'lucide-react';
+import { Pencil, Trash2, UserPlus } from "lucide-react";
+import { userAPI } from "@/services";
 
 export default function UserList() {
-  const [users, setUsers] = useState([
-    { id: 1, username: 'admin', email: 'admin@example.com', role: 'admin' },
-    { id: 2, username: 'user1', email: 'user1@example.com', role: 'user' },
-    { id: 3, username: 'user2', email: 'user2@example.com', role: 'user' },
-  ]);
-  
+  const [users, setUsers] = useState([]);
+
+  const fetchUsers = async () => {
+    const response = await userAPI.getUsers();
+    if (response) {
+      if (Array.isArray(response)) {
+        setUsers(response);
+      } else {
+        setUsers([]);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    role: 'user'
+    first_name: "",
+    last_name: "",
+    email: "",
+    password: "",
+    role: "user",
   });
+
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   // Add new user
-  const handleAddUser = (e) => {
+  const handleAddUser = async (e) => {
     e.preventDefault();
-    const newUser = {
-      id: users.length + 1,
-      username: formData.username,
-      email: formData.email,
-      role: formData.role
-    };
-    setUsers([...users, newUser]);
+    formData.first_name = firstname;
+    formData.last_name = lastname;
+    formData.email = email;
+    formData.password = password;
+    const response = await userAPI.addUser(formData);
+    if (response) {
+      setUsers((prev) => [...prev, response]);
+    }
     setIsAddDialogOpen(false);
-    setFormData({ username: '', email: '', password: '', role: 'user' });
+    setFormData({
+      first_name: "",
+      last_name: "",
+      email: "",
+      password: "",
+      role: "user",
+    });
   };
 
   // Update user
-  const handleUpdateUser = (e) => {
+  const handleUpdateUser = async (e) => {
     e.preventDefault();
-    const updatedUsers = users.map(user => {
-      if (user.id === currentUser.id) {
-        return {
-          ...user,
-          username: formData.username,
-          email: formData.email,
-          role: formData.role
-        };
-      }
-      return user;
-    });
-    setUsers(updatedUsers);
+
+    const data = await userAPI.updateUser(currentUser.id, formData);
+    if (data) {
+      const updatedUsers = users.map((user) =>
+        user.id === data.id ? data : user
+      );
+      setUsers(updatedUsers);
+    }
+
     setIsEditDialogOpen(false);
     setCurrentUser(null);
   };
 
   // Delete user
-  const handleDeleteUser = (userId) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
-    const updatedUsers = users.filter(user => user.id !== userId);
+  const handleDeleteUser = async (userId) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    const response = await userAPI.deleteUser(userId);
+    if (!response) {
+      alert("Failed to delete user");
+      return;
+    }
+    const updatedUsers = users.filter((user) => user.id !== userId);
     setUsers(updatedUsers);
   };
 
   const handleEditClick = (user) => {
     setCurrentUser(user);
     setFormData({
-      username: user.username,
+      first_name: user.first_name,
+      last_name: user.last_name,
       email: user.email,
-      password: '',
-      role: user.role
+      password: "",
+      role: user.role,
     });
     setIsEditDialogOpen(true);
   };
@@ -113,12 +136,22 @@ export default function UserList() {
             </DialogHeader>
             <form onSubmit={handleAddUser} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="first_name">First Name</Label>
                 <Input
-                  id="username"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
+                  id="first_name"
+                  name="first_name"
+                  value={firstname}
+                  onChange={(e) => setFirstname(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="first_name">Last Name</Label>
+                <Input
+                  id="last_name"
+                  name="last_name"
+                  value={lastname}
+                  onChange={(e) => setLastname(e.target.value)}
                   required
                 />
               </div>
@@ -128,8 +161,8 @@ export default function UserList() {
                   id="email"
                   name="email"
                   type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -139,11 +172,12 @@ export default function UserList() {
                   id="password"
                   name="password"
                   type="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
+              {/*
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
                 <select
@@ -157,7 +191,10 @@ export default function UserList() {
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              <Button type="submit" className="w-full">Add User</Button>
+              */}
+              <Button type="submit" className="w-full">
+                Add User
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -169,11 +206,21 @@ export default function UserList() {
             </DialogHeader>
             <form onSubmit={handleUpdateUser} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-username">Username</Label>
+                <Label htmlFor="first_name">First name</Label>
                 <Input
-                  id="edit-username"
-                  name="username"
-                  value={formData.username}
+                  id="first_name"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="first_name">Last name</Label>
+                <Input
+                  id="last_name"
+                  name="last_name"
+                  value={formData.last_name}
                   onChange={handleInputChange}
                   required
                 />
@@ -190,7 +237,9 @@ export default function UserList() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-password">Password (leave blank to keep current)</Label>
+                <Label htmlFor="edit-password">
+                  Password (leave blank to keep current)
+                </Label>
                 <Input
                   id="edit-password"
                   name="password"
@@ -199,6 +248,7 @@ export default function UserList() {
                   onChange={handleInputChange}
                 />
               </div>
+              {/*
               <div className="space-y-2">
                 <Label htmlFor="edit-role">Role</Label>
                 <select
@@ -212,7 +262,10 @@ export default function UserList() {
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              <Button type="submit" className="w-full">Update User</Button>
+              */}
+              <Button type="submit" className="w-full">
+                Update User
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -224,38 +277,50 @@ export default function UserList() {
             <table className="w-full">
               <thead className="border-b bg-muted/50">
                 <tr>
-                  <th className="py-3 px-4 text-left font-medium">Username</th>
+                  <th className="py-3 px-4 text-left font-medium">
+                    First name
+                  </th>
+                  <th className="py-3 px-4 text-left font-medium">Last name</th>
                   <th className="py-3 px-4 text-left font-medium">Email</th>
-                  <th className="py-3 px-4 text-left font-medium">Role</th>
+                  {/*<th className="py-3 px-4 text-left font-medium">Role</th>*/}
                   <th className="py-3 px-4 text-right font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
-                  <tr key={user.id} className="border-b">
-                    <td className="py-3 px-4">{user.username}</td>
-                    <td className="py-3 px-4">{user.email}</td>
-                    <td className="py-3 px-4">{user.role}</td>
-                    <td className="py-3 px-4 text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEditClick(user)}
-                        className="mr-2"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteUser(user.id)}
-                        className="text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                {users.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="py-3 px-4 text-center">
+                      No users found
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  users.map((user) => (
+                    <tr key={user.id} className="border-b">
+                      <td className="py-3 px-4">{user.first_name}</td>
+                      <td className="py-3 px-4">{user.last_name}</td>
+                      <td className="py-3 px-4">{user.email}</td>
+                      {/*<td className="py-3 px-4">{user.role}</td>*/}
+                      <td className="py-3 px-4 text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditClick(user)}
+                          className="mr-2"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteUser(user.id)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
