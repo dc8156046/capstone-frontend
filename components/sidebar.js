@@ -50,7 +50,11 @@ const sidebarNavItems = [
     submenu: [
       {
         title: "Project List",
-        href: "/dashboard/project",
+        href: "/dashboard/project/list",
+      },
+      {
+        title: "Project Detail",
+        href: "/dashboard/project/detail",
       },
     ],
   },
