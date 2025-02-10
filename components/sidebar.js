@@ -52,6 +52,10 @@ const sidebarNavItems = [
         title: "Project List",
         href: "/dashboard/project",
       },
+      {
+        title: "Project Detail",
+        href: "/dashboard/project/detail",
+      },
     ],
   },
   {
