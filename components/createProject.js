@@ -22,8 +22,9 @@ const CreateProject = () => {
     city: "",
     province: "",
     budget: "",
-    status: "Normal",
-    priority: "Normal",
+    // status: "Normal",
+    priority: "Low",
+    duration: "",
     tasks: {
       foundation: [],
       framing: [],
@@ -96,13 +97,13 @@ const CreateProject = () => {
   };
 
 
-
+//className="max-w-full mx-auto bg-white p-8 shadow-lg rounded-lg w-full"
   return (
-    <div className="max-w-4xl mx-auto bg-white p-8 shadow-lg rounded-lg w-full">
+    <div >
       <h2 className="text-2xl font-bold text-center mb-6">Create a New Project</h2>
       <form>
         <div className="grid grid-cols-2 gap-8">
-          <div className="bg-gray-100 p-6 rounded-lg col-span-2 w-full">
+          <div className="bg-gray-100 p-6 rounded-lg col-span-1 w-full">
             <h3 className="text-lg font-semibold mb-4">1️⃣ Start with the basics</h3>
             <label className="block mb-2">Project Name</label>
             <input type="text" name="name" className="w-full border rounded p-2 mb-4" value={projectData.name} onChange={handleInputChange} />
@@ -132,6 +133,10 @@ const CreateProject = () => {
               <div>
                 <label className="block mb-1">Priority</label>
                 <div className="flex space-x-4">
+                <label className="flex items-center">
+                    <input type="radio" name="priority" value="Low" checked={projectData.priority === "Low"} onChange={handleInputChange} className="mr-2" />
+                    Low
+                  </label>
                   <label className="flex items-center">
                     <input type="radio" name="priority" value="Normal" checked={projectData.priority === "Normal"} onChange={handleInputChange} className="mr-2" />
                     Normal
@@ -143,7 +148,7 @@ const CreateProject = () => {
                 </div>
               </div>
 
-              <div>
+              {/* <div>
                 <label htmlFor="status" className="block mb-1">
                   Current Status
                 </label>
@@ -158,7 +163,7 @@ const CreateProject = () => {
                   <option value="Complete">Complete</option>
                   <option value="Delay">Delay</option>
                 </select>
-              </div>
+              </div> */}
 
             </div>
 
@@ -175,8 +180,9 @@ const CreateProject = () => {
               </div>
               <div>
                 <label className="block mb-2">Duration</label>
-                <input type="text" value={endDate.toLocaleDateString()} readOnly className="w-full border rounded p-2 cursor-pointer" onClick={() => setShowEndCalendar(!showEndCalendar)} />
-                  {showEndCalendar && <Calendar onChange={handleDateChange(setEndDate, setStartDate, -2)} value={endDate} />}
+                {/* <input type="text" value={endDate.toLocaleDateString()} readOnly className="w-full border rounded p-2 cursor-pointer" onClick={() => setShowEndCalendar(!showEndCalendar)} />
+                  {showEndCalendar && <Calendar onChange={handleDateChange(setEndDate, setStartDate, -2)} value={endDate} />} */}
+                <input type="number" name="duration" className="w-full border rounded p-2 mb-4" value={projectData.duration} onChange={handleInputChange} />
               </div>
 
             </div>
@@ -185,7 +191,7 @@ const CreateProject = () => {
 
           </div>
           
-          <div className="bg-gray-100 p-6 rounded-lg col-span-2 w-full">
+          <div className="bg-gray-100 p-6 rounded-lg col-span-1 w-full">
             <h3 className="font-bold mb-6">2️⃣ Choose tasks</h3>
             {Object.keys(projectData.tasks).map((category) => (
               <div key={category} className="mb-6">
