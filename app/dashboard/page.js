@@ -8,6 +8,37 @@ export default function DashboardPage() {
       2.Add Project button needs to be implement to actually add a new project
 
   */
+      const TestDataDash = [
+        {
+          id: 1,
+          name: "Project Alpha",
+          address: "123 Main St, Calgary, AB",
+          startDate: new Date("2025-10-01"),
+          endDate: new Date("2026-12-15"),
+          complete: 75,
+          status: "In Progress",
+        },
+        {
+          id: 2,
+          name: "Project Beta",
+          address: "456 Elm St, Edmonton, AB",
+          startDate: new Date("2025-09-15"),
+          endDate: new Date("2025-10-20"),
+          complete: 50,
+          status: "Pending",
+        },
+        {
+          id: 3,
+          name: "Project Gamma",
+          address: "789 Oak St, Vancouver, BC",
+          startDate: new Date("2025-11-01"),
+          endDate: new Date("2026-03-30"),
+          complete: 25,
+          status: "Delayed",
+        },
+      ];
+
+
  
   return (
     <div className="p-6 space-y-6">
@@ -32,6 +63,7 @@ export default function DashboardPage() {
               <p className="text-lg font-bold">{"0"}</p>
               <p className="text-sm font-semibold">Total Projects</p>
             </div>
+            
           </div>
         </CardContent>
       </Card>
