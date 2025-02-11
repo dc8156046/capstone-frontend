@@ -65,7 +65,7 @@ const CreateProject = () => {
     const confirmCancel = window.confirm("Are you sure you want to cancel？");
 
     if (confirmCancel) {
-      window.history.back();
+      window.location.href = '/dashboard';
       console.log("Yes");
     } else {
       console.log("No");
@@ -93,6 +93,7 @@ const CreateProject = () => {
     e.preventDefault();
     console.log(projectData);
     alert("Project Created!");
+    window.location.href = '/dashboard';
   };
 
 
@@ -153,7 +154,7 @@ const CreateProject = () => {
                   value={projectData.status}
                   onChange={handleInputChange}
                 >
-                  <option value="Normal">Normal</option>
+                  <option value="Normal">In progress</option>
                   <option value="Pending">Pending</option>
                   <option value="Complete">Complete</option>
                   <option value="Delay">Delay</option>
