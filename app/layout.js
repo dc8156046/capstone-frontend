@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Capstone Project - BricksbyClick",
+  title: "Capstone Project - BrickbyClick",
   description: "BricksbyClick Capstone Project",
 };
 

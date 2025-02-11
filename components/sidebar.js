@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/collapsible";
 import { useState } from "react";
 
-// 定义侧边栏菜单项
 const sidebarNavItems = [
   {
     title: "Dashboard",
@@ -33,10 +32,6 @@ const sidebarNavItems = [
       {
         title: "User List",
         href: "/dashboard/users",
-      },
-      {
-        title: "Roles",
-        href: "/dashboard/users/roles",
       },
       {
         title: "Permissions",
@@ -78,12 +73,9 @@ export function Sidebar() {
   };
 
   return (
-    <nav className="space-y-2 py-4">
+    <nav className="space-y-2 py-4 ">
       <div className="px-3 py-2">
         <div className="space-y-1">
-          <h2 className="mb-2 px-4 text-xl font-semibold tracking-tight">
-            Menu
-          </h2>
           <nav className="space-y-1">
             {sidebarNavItems.map((item) =>
               item.submenu ? (
@@ -94,7 +86,7 @@ export function Sidebar() {
                 >
                   <CollapsibleTrigger
                     className={cn(
-                      "flex w-full items-center justify-between px-4 py-2 text-sm font-medium rounded-md",
+                      "flex w-full items-center justify-between px-4 py-2 text-md font-medium rounded-md",
                       "hover:bg-accent hover:text-accent-foreground",
                       "transition-colors duration-200",
                       pathname.startsWith("/dashboard/users") ||
@@ -115,7 +107,7 @@ export function Sidebar() {
                         key={subItem.href}
                         href={subItem.href}
                         className={cn(
-                          "flex items-center py-2 px-4 text-sm rounded-md",
+                          "flex items-center py-2 px-4 text-md rounded-md",
                           "hover:bg-accent hover:text-accent-foreground",
                           "transition-colors duration-200",
                           pathname === subItem.href
@@ -133,7 +125,7 @@ export function Sidebar() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center px-4 py-2 text-sm font-medium rounded-md",
+                    "flex items-center px-4 py-2 text-md font-medium rounded-md",
                     "hover:bg-accent hover:text-accent-foreground",
                     "transition-colors duration-200",
                     pathname === item.href

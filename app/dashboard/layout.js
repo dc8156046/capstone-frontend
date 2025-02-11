@@ -15,12 +15,11 @@ export default function DashboardLayout({ children }) {
           <Link href="/dashboard" className="mr-4 hidden md:flex">
             <Logo />
           </Link>
-          <MainNav className="mx-6" />
           <div className="ml-auto flex items-center space-x-4">
             <Link href="/dashboard/help-page">
-            <button>
-              <CircleHelp />
-            </button>
+              <button>
+                <CircleHelp />
+              </button>
             </Link>
             <UserNav />
           </div>
@@ -30,7 +29,7 @@ export default function DashboardLayout({ children }) {
       {/* Main content */}
       <div className="flex-1 flex">
         {/* Sidebar */}
-        <aside className="hidden md:flex w-64 flex-shrink-0 border-r bg-background">
+        <aside className="hidden md:flex px-4 flex-shrink-0 border-r bg-background">
           <Sidebar />
         </aside>
 
@@ -40,7 +39,6 @@ export default function DashboardLayout({ children }) {
         </main>
       </div>
 
-      {/* Footer - 放在主flex容器之外 */}
       <Footer />
     </div>
   );
