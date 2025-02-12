@@ -1,21 +1,28 @@
 // create_project.js
 "use client";
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import React, { useState } from "react";
 import { Calendar } from "react-calendar"; // Ensure react-calendar is installed
 import "react-calendar/dist/Calendar.css";
 
 const allTasks = {
-  foundation: ["Pin Footing", "Wall Pours", "Strip Forms"],
-  framing: ["Basement Framing", "Main Floor Wall Framing", "Frame Garage Wall"],
-  roughins: ["Electrical", "Plumbing", "HVAC"],
+  foundation: ["Pin Footing", "Footing Forms with Rebar", "Footing Pour","Wall Forms and Rebar","Wall Pours","Strip Forms","Crane Forms","Tap Spray","Weeping Tile and Gravel","Foundation Inspection","Excavation Backfill"],
+  framing: ["Basement Framing/Subfloor Dlivery", "Main Floor Wall Framing", "Frame Garage Wall","Basment Partition Walls","Mainfloor Subfloor","Mainfloor Wall Delivery","Form for Center Concrete Wall","Pour Center Concrete Wall","Strip Forms and Remove From Site","2nd Subfloor Delivery","Frame 2nd Subfloor","Frame 2nd Floor Wall","Truss Delivery","Truss Install/Sheathing","Window and Door Install"],
+  roughins: ["Plumbing groundworks", "Basement Slab Pre","Basement Slab Concr3ete Pour","ABS Plumbing Roughins","insulation/poly/dry","HVAC Roughin","Gasline Install","Frame Bulkheads and Complete Backframing","Electrical Roughins","Firestopping","Inspection","Progress Inspection"],
+  Exterior_Finsihses:["Roofings","Siding","Windows","Doors","Eavestrough","Soffits/fascia/banc","Stucco Paper and wire","Stucco Scratch coa","Stucco color"],
+  Insulation_and_Drywal:["Spray Foam","Batt Insulation","Drywall","Taping","Ceiling","Sanding","Prime","Drywall Toughup"], 
+  Interior :["Interior Finishg","Millwork","Countertop Templating","1st Coat of Trim. Paint and Spray","Coutnertop Install","Tile Floors and Wall","Hardwood Floors","Hard Baseboard","Carpet Installs","Lock Outs Shelving","Shower Doors and Mirros","Plumbing Finals","Electrical Finals","HVAC Finals","Window Lock Outs"],
+  Exterior_Site_Work:["Site Services Install","Driveway Prep","Driveway Pour","Garage Pad Prep","Garage Pad Pour","Sidewalk Prep","Sidewalk Pour","Landscaping","Fence","Deck","Balcony Railing"],
+  Garages :["Garage Forming","Install Rebar, Poly","Pour Concrete Slab","Frame Garage","Install Shinglees","Stucco Paper and Wire","Stucco Scratch Coat","Stucco Colour Coat"]
+
 };
 
 const CreateProject = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date(Date.now() + 2 * 24 * 60 * 60 * 1000));
   const [showStartCalendar, setShowStartCalendar] = useState(false);
-  const [showEndCalendar, setShowEndCalendar] = useState(false);
+  // const [showEndCalendar, setShowEndCalendar] = useState(false);
   const [projectData, setProjectData] = useState({
     name: "",
     address: "",
@@ -24,11 +31,16 @@ const CreateProject = () => {
     budget: "",
     // status: "Normal",
     priority: "Low",
-    duration: "",
+    duration: "2",
     tasks: {
       foundation: [],
       framing: [],
       roughins: [],
+      Exterior_Finsihses: [],
+      Insulation_and_Drywal:[],
+      Interior:[],
+      Exterior_Site_Work:[],
+      Garages:[],
     },
   });
 
@@ -63,7 +75,7 @@ const CreateProject = () => {
   // });
 
   const handleCancel = () => {
-    const confirmCancel = window.confirm("Are you sure you want to cancel？");
+    const confirmCancel = window.confirm("Are you sure you want to cancel?");
 
     if (confirmCancel) {
       window.history.back();
@@ -92,24 +104,78 @@ const CreateProject = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+     // Ensure that the form is valid before proceeding
+    const form = e.target;
+
+    // Check if the form is valid
+    if (!form.checkValidity()) {
+      // Trigger built-in form validation
+      toast.error("Please fill in all required fields correctly.");
+      return;
+    }
+
+    // Check if the project name is empty
+    if (!projectData.name || projectData.name.trim() === "") {
+      toast.error("Project Name cannot be empty.");
+      return;
+    }
+
+    // Check if the project address is empty
+    if (!projectData.address || projectData.address.trim() === "") {
+      toast.error("Project Address cannot be empty.");
+      return;
+    }
+
+    // Check if the budget is empty or negative
+    if (!projectData.budget || projectData.budget < 0) {
+      toast.error("Budget cannot be empty or negative.");
+      return;
+    }
+    // Validate Project Name
+    if (projectData.name.length > 50) {
+      toast.error("Project Name cannot exceed 50 characters.");
+      return;
+    }
+
+    // Validate Address
+    if (projectData.address.length > 100) {
+      toast.error("Project Address cannot exceed 100 characters.");
+      return;
+    }
+
+    // Validate Budget (should not be negative)
+    if (projectData.budget < 0) {
+      toast.error("Budget cannot be a negative number.");
+      return;
+    }
+
+    // Validate Duration (should not be negative)
+    if (projectData.duration < 0) {
+      toast.error("Duration cannot be a negative number.");
+      return;
+    }
+
+    // If all checks pass
     console.log(projectData);
-    alert("Project Created!");
-  };
+    toast.success("Project Created!");
+    };
 
 
 //className="max-w-full mx-auto bg-white p-8 shadow-lg rounded-lg w-full"
   return (
-    <div >
+    <div>
+      {/* Toast Container to show the toasts */}
+      <ToastContainer />
       <h2 className="text-2xl font-bold text-center mb-6">Create a New Project</h2>
       <form>
         <div className="grid grid-cols-2 gap-8">
           <div className="bg-gray-100 p-6 rounded-lg col-span-1 w-full">
             <h3 className="text-lg font-semibold mb-4">1️⃣ Start with the basics</h3>
             <label className="block mb-2">Project Name</label>
-            <input type="text" name="name" className="w-full border rounded p-2 mb-4" value={projectData.name} onChange={handleInputChange} />
+            <input type="text" required  name="name" className="w-full border rounded p-2 mb-4" value={projectData.name} onChange={handleInputChange} />
             
             <label className="block mb-2">Project Address</label>
-            <input type="text" name="address" className="w-full border rounded p-2 mb-4" value={projectData.address} onChange={handleInputChange} />
+            <input type="text" required  name="address" className="w-full border rounded p-2 mb-4" value={projectData.address} onChange={handleInputChange} />
             
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -167,10 +233,8 @@ const CreateProject = () => {
 
             </div>
 
-
-            
             <label className="block mt-4 mb-2">Budget</label>
-            <input type="number" name="budget" className="w-full border rounded p-2" value={projectData.budget} onChange={handleInputChange} />
+            <input  required  type="number" name="budget" className="w-full border rounded p-2" value={projectData.budget} onChange={handleInputChange} />
             
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div>
@@ -211,9 +275,6 @@ const CreateProject = () => {
                   <button type="button" onClick={handleSubmit} className="bg-gray-500 text-white px-6 py-2 rounded">Add Task</button>
               </div>
           </div>
-
-           
-
         </div>
         
         <div className="flex justify-end space-x-4 mt-6">
