@@ -8,7 +8,7 @@ export default function DashboardPage() {
       2.Add Project button needs to be implement to actually add a new project
 
   */
-
+ 
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Dashboard</h1>
