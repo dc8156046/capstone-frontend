@@ -5,7 +5,7 @@ export default function ProjectListPage(){
   const testProjects = [
     {
       id: 1,
-      name: "Project Alpha",
+      name: "Project One",
       address: "123 Main St, Calgary, AB",
       startDate: new Date("2025-10-01"),
       endDate: new Date("2026-12-15"),
@@ -15,7 +15,7 @@ export default function ProjectListPage(){
     },
     {
       id: 2,
-      name: "Project Beta",
+      name: "Project Two",
       address: "456 Elm St, Edmonton, AB",
       startDate: new Date("2025-09-15"),
       endDate: new Date("2025-10-20"),
@@ -25,7 +25,7 @@ export default function ProjectListPage(){
     },
     {
       id: 3,
-      name: "Project Gamma",
+      name: "Project Three",
       address: "789 Oak St, Vancouver, BC",
       startDate: new Date("2025-11-01"),
       endDate: new Date("2026-03-30"),
