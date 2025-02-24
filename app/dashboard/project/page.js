@@ -2,36 +2,47 @@ import ProgressBar from "@/components/progressBar";
 
 export default function ProjectListPage(){
 
+  //Mock data
   const testProjects = [
     {
       id: 1,
-      name: "Project One",
+      name: "Project 1",
       address: "123 Main St, Calgary, AB",
-      startDate: new Date("2025-10-01"),
-      endDate: new Date("2026-12-15"),
+      startDate: new Date("2025.09.30"),
+      endDate: new Date("2026.12.14"),
       budget: "$500,000",
       complete: 75,
       status: "In Progress",
     },
     {
       id: 2,
-      name: "Project Two",
-      address: "456 Elm St, Edmonton, AB",
-      startDate: new Date("2025-09-15"),
-      endDate: new Date("2025-10-20"),
+      name: "Project 2",
+      address: "435 Street, Vancouver, BC",
+      startDate: new Date("2024.05.27"),
+      endDate: new Date("2025.03.19"),
       budget: "$750,000",
-      complete: 50,
-      status: "Pending",
+      complete: 0,
+      status: "Upcoming",
     },
     {
       id: 3,
-      name: "Project Three",
-      address: "789 Oak St, Vancouver, BC",
-      startDate: new Date("2025-11-01"),
-      endDate: new Date("2026-03-30"),
+      name: "Project 3",
+      address: "564 Ridge, Edmonton, AB",
+      startDate: new Date("2025.01.14"),
+      endDate: new Date("2025.09.16"),
       budget: "$1,000,000",
       complete: 25,
       status: "Delayed",
+    },
+    {
+      id: 4,
+      name: "Project 4",
+      address: "786 Point, Calgary, AB",
+      startDate: new Date("2025.06.7"),
+      endDate: new Date("2026.05.16"),
+      budget: "$1,000,000",
+      complete: 100,
+      status: "Complete",
     },
   ];
 
@@ -61,7 +72,7 @@ export default function ProjectListPage(){
       <div>
         <ProgressBar percentage={project.complete} />
       </div>
-      <div>{project.status}</div>
+      <div className={project.status === "Delayed" ? "text-red-500" : project.status === "Complete" ? "text-green-500" : ""}>{project.status}</div>
     </div>
   ))}
 </div>
