@@ -71,7 +71,7 @@ export default function DashboardPage() {
                     )}
                     <p className="text-sm mt-2">{project.address}</p>
                     <p className="text-sm mt-2">{project.status === "Upcoming" ? project.date.split(" - ")[0] : project.date}</p>
-                    <p className={`text-sm text-white rounded-lg mt-3 ${project.status === "In Progress" ? "bg-cyan-600" : project.status === "Upcoming" ? "bg-gray-400" : project.status === "Delayed" ? "bg-red-600" : project.status === "Complete" ? "bg-green-600" : ""}`}>{project.status}</p>
+                    <p className={`text-sm text-white rounded-full mt-3 ${project.status === "In Progress" ? "bg-cyan-600" : project.status === "Upcoming" ? "bg-gray-400" : project.status === "Delayed" ? "bg-red-600" : project.status === "Complete" ? "bg-green-600" : ""}`}>{project.status}</p>
                   </li>
                 ))}
               </ul>
