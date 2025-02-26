@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import React, { useState } from "react";
 import { Calendar } from "react-calendar"; // Ensure react-calendar is installed
 import "react-calendar/dist/Calendar.css";
+// import { AddTaskDialog } from './addTask';
 
 const allTasks = {
   foundation: ["Pin Footing", "Footing Forms with Rebar", "Footing Pour","Wall Forms and Rebar","Wall Pours","Strip Forms","Crane Forms","Tap Spray","Weeping Tile and Gravel","Foundation Inspection","Excavation Backfill"],
@@ -159,8 +160,8 @@ const CreateProject = () => {
     console.log(projectData);
     toast.success("Project Created!");
     window.location.href = '#';
-    };
   };
+
 
 
 
@@ -174,10 +175,10 @@ const CreateProject = () => {
         <div className="grid grid-cols-2 gap-8">
           <div className="bg-gray-100 p-6 rounded-lg col-span-1 w-full">
             <h3 className="text-lg font-semibold mb-4">1️⃣ Start with the basics</h3>
-            <label className="block mb-2">Project Name</label>
+            <label className="block mb-2">Project Name *</label>
             <input type="text" required  name="name" className="w-full border rounded p-2 mb-4" value={projectData.name} onChange={handleInputChange} />
             
-            <label className="block mb-2">Project Address</label>
+            <label className="block mb-2">Project Address *</label>
             <input type="text" required  name="address" className="w-full border rounded p-2 mb-4" value={projectData.address} onChange={handleInputChange} />
             
             <div className="grid grid-cols-2 gap-4">
@@ -236,7 +237,7 @@ const CreateProject = () => {
 
             </div>
 
-            <label className="block mt-4 mb-2">Budget</label>
+            <label className="block mt-4 mb-2">Budget *</label>
             <input  required  type="number" name="budget" className="w-full border rounded p-2" value={projectData.budget} onChange={handleInputChange} />
             
             <div className="grid grid-cols-2 gap-4 mt-4">
@@ -274,8 +275,11 @@ const CreateProject = () => {
                 </div>
               </div>        
             ))}
-              <div className="flex space-x-4 mt-6">
+              {/* <div className="flex space-x-4 mt-6">
                   <button type="button" onClick={handleSubmit} className="bg-gray-500 text-white px-6 py-2 rounded">Add Task</button>
+              </div> */}
+              <div>
+                <p>*To customize tasks, please go to the project details page.</p>
               </div>
           </div>
         </div>

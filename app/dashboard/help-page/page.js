@@ -33,7 +33,7 @@ export default function HelpPage(){
         <p className="font-medium mt-2">Common Issues:</p>
         <ul className="list-disc ml-5">
             <li><strong>Login Problems:</strong> Ensure you are using the correct username and password. If you’re locked out, use the password reset feature.</li>
-            <li><strong>Data Not Saving:</strong> If changes aren’t saving, check your internet connection and ensure all required fields are filled out.</li>
+            <li><strong>Data Not Saving:</strong> If changes aren't saving, check your internet connection and ensure all required fields are filled out.</li>
             <li><strong>Slow Performance:</strong> Clear your browser cache or try a different browser to see if performance improves.</li>
         </ul>
         <p className="font-medium mt-2">Error Messages:</p>
@@ -49,7 +49,7 @@ export default function HelpPage(){
                 <strong>Updating Your Profile:</strong> To update your profile, click on your icon located at the top right corner of the screen. From the dropdown menu, select "Edit Profile" and make your desired changes. Don’t forget to save!
             </li>
             <li>
-                <strong>Password Reset:</strong> If you’ve forgotten your password, click on the "Forgot Password?" link on the login page. Follow the prompts to reset your password via the email associated with your account.
+                <strong>Password Reset:</strong> If you've forgotten your password, click on the "Forgot Password?" link on the login page. Follow the prompts to reset your password via the email associated with your account.
             </li>
         </ul>
     </div>
