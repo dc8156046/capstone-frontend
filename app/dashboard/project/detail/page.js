@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Gantt, ViewMode } from 'gantt-task-react';
 import "gantt-task-react/dist/index.css";
+import TaskDetailsTable from '@/components/task_details/task-details-table';
 
 const TaskStatus = {
   PENDING: "pending",
@@ -275,6 +276,9 @@ const ProjectDetail = () => {
       </Card>
 
       {/* Task Details Section */}
+              <TaskDetailsTable />
+        
+
     </div>
   );
 };
