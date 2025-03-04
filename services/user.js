@@ -8,4 +8,8 @@ export const userAPI = {
   addUser: (data) => apiService.post("/users/", data),
   updateUser: (id, data) => apiService.put(`/users/${id}`, data),
   deleteUser: (id) => apiService.delete(`/users/${id}`),
+  signUp: (email, password, companyName) => 
+    apiService.postForm("/auth/signup", { username: email, password: password, company: companyName}),
+  forgotPassword: (email) =>
+    apiService.postForm("/auth/forgot-password", { username: email}),
 };

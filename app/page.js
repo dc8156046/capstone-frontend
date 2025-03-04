@@ -109,10 +109,15 @@ export default function Home() {
                 />
               </div>
             </div>
-            <div className="flex items-center justify-end">
+            <div className="">
               <Link
-                href="/forgot-password"
-                className="text-sm text-primary hover:underline"
+              href="/create-account"
+              className="text-sm text-primary hover:underline">
+                Create an account
+              </Link>
+              <Link
+                href="/forgot-pass" 
+                className="text-sm text-primary hover:underline ml-40"
               >
                 Forgot password?
               </Link>
