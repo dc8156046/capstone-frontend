@@ -6,6 +6,19 @@ import { Gantt, ViewMode } from 'gantt-task-react';
 import "gantt-task-react/dist/index.css";
 import TaskDetailsTable from '@/components/task_details/task-details-table';
 
+const customGanttStyles = `
+  .gantt-header-month {
+    font-size: 14px;
+    font-weight: normal;
+    padding: 6px 0;
+  }
+  
+  .gantt-header-day {
+    font-size: 12px;
+    font-weight: normal;
+  }
+`;
+
 const TaskStatus = {
   PENDING: "pending",
   IN_PROGRESS: "in_progress",
@@ -21,9 +34,9 @@ const statusColors = {
 };
 
 const ProjectDetail = () => {
-  const [view, setView] = useState(ViewMode.Week);
+  const [view, setView] = useState(ViewMode.Day);
   
-  let columnWidth = 65;
+  let columnWidth = 60;
   if (view === ViewMode.Year) {
     columnWidth = 350;
   } else if (view === ViewMode.Month) {
@@ -31,7 +44,7 @@ const ProjectDetail = () => {
   } else if (view === ViewMode.Week) {
     columnWidth = 250;
   }
-
+  
   const projectData = {
     id: 1,
     name: "SAIT Sports Center",
@@ -44,14 +57,15 @@ const ProjectDetail = () => {
     current_assignee: 1,
   };
 
-  const tasks = [
+  const initialTasks = [
     {
       start: new Date(2024, 11, 1),
       end: new Date(2024, 11, 25),
       name: 'Foundation',
-      id: 'Task 1',
+      id: 'Foundation',
       type: 'project',
       progress: 45,
+      hideChildren: false,
       project_id: projectData.id,
       status: TaskStatus.IN_PROGRESS,
       budget: 20000,
@@ -63,151 +77,177 @@ const ProjectDetail = () => {
         progressColor: '#227B94', 
         progressSelectedColor: '#227B94' 
       },
+      isDisabled: true
     },
     {
       start: new Date(2024, 11, 1),
       end: new Date(2024, 11, 20),
       name: 'Pin Footing',
-      id: '1-1',
+      id: 'Task 1-1',
       type: 'task',
       progress: 0,
+      project: 'Foundation',
+      dependencies: ['Foundation'],
       project_id: projectData.id,
       status: TaskStatus.PENDING,
       budget: 5000,
       amount_due: 0,
       assignee_id: 1,
-      dependencies: ['Task 1'],
       styles: {
         backgroundColor: statusColors[TaskStatus.PENDING]
-      }
+      },
+      isDisabled: true
     },
     {
       start: new Date(2024, 11, 15),
       end: new Date(2024, 11, 18),
       name: 'Wall Pours',
-      id: '1-2',
+      id: 'Task 1-2',
       type: 'task',
       progress: 0,
+      project: 'Foundation',
+      dependencies: ['Task 1-1'],
       project_id: projectData.id,
       status: TaskStatus.PENDING,
       budget: 8000,
       amount_due: 0,
       assignee_id: 1,
-      dependencies: ['1-1'],
       styles: {
         backgroundColor: statusColors[TaskStatus.PENDING]
-      }
+      },
+      isDisabled: true
     },
     {
       start: new Date(2024, 11, 16),
       end: new Date(2024, 11, 17),
       name: 'Strip Forms',
-      id: '1-3',
+      id: 'Task 1-3',
       type: 'task',
       progress: 0,
+      project: 'Foundation',
+      dependencies: ['Task 1-2'],
       project_id: projectData.id,
       status: TaskStatus.PENDING,
       budget: 7000,
       amount_due: 0,
       assignee_id: 1,
-      dependencies: ['1-2'],
       styles: {
         backgroundColor: statusColors[TaskStatus.PENDING]
-      }
+      },
+      isDisabled: true
     },
     {
       start: new Date(2024, 11, 26),
       end: new Date(2025, 0, 2),
       name: 'Framing',
-      id: 'Task 2',
+      id: 'Framing',
       type: 'project',
       progress: 0,
+      hideChildren: false,
+      dependencies: ['Foundation'],
       project_id: projectData.id,
       status: TaskStatus.PENDING,
       budget: 15000,
       amount_due: 0,
       assignee_id: 2,
-      dependency: 'Task 1',
       styles: { 
         backgroundColor: statusColors[TaskStatus.PENDING],
         backgroundSelectedColor: '#227B94',
         progressColor: '#227B94', 
         progressSelectedColor: '#227B94' 
       },
+      isDisabled: true
     },
     {
       start: new Date(2024, 11, 26),
       end: new Date(2024, 11, 27),
       name: 'Basement Framing',
-      id: '2-1',
+      id: 'Task 2-1',
       type: 'task',
       progress: 0,
+      project: 'Framing',
+      dependencies: ['Framing'],
       project_id: projectData.id,
       status: TaskStatus.PENDING,
       budget: 3000,
       amount_due: 0,
       assignee_id: 2,
-      dependencies: ['Task 2'],
       styles: {
         backgroundColor: statusColors[TaskStatus.PENDING]
-      }
+      },
+      isDisabled: true
     },
     {
       start: new Date(2024, 11, 27),
       end: new Date(2024, 11, 29),
       name: 'Main Floor Wall',
-      id: '2-2',
+      id: 'Task 2-2',
       type: 'task',
       progress: 0,
+      project: 'Framing',
+      dependencies: ['Task 2-1'],
       project_id: projectData.id,
       status: TaskStatus.PENDING,
       budget: 4000,
       amount_due: 0,
       assignee_id: 2,
-      dependencies: ['2-1'],
       styles: {
         backgroundColor: statusColors[TaskStatus.PENDING]
-      }
+      },
+      isDisabled: true
     },
     {
       start: new Date(2024, 11, 29),
       end: new Date(2024, 11, 31),
       name: 'Garage Wall',
-      id: '2-3',
+      id: 'Task 2-3',
       type: 'task',
       progress: 0,
+      project: 'Framing',
+      dependencies: ['Task 2-2'],
       project_id: projectData.id,
       status: TaskStatus.PENDING,
       budget: 4000,
       amount_due: 0,
       assignee_id: 2,
-      dependencies: ['2-2'],
       styles: {
         backgroundColor: statusColors[TaskStatus.PENDING]
-      }
+      },
+      isDisabled: true
     },
     {
       start: new Date(2024, 11, 31),
       end: new Date(2025, 0, 2),
       name: 'Truss Delivery',
-      id: '2-4',
+      id: 'Task 2-4',
       type: 'task',
       progress: 0,
+      project: 'Framing',
+      dependencies: ['Task 2-3'],
       project_id: projectData.id,
       status: TaskStatus.PENDING,
       budget: 4000,
       amount_due: 0,
       assignee_id: 2,
-      dependencies: ['2-3'],
       styles: {
         backgroundColor: statusColors[TaskStatus.PENDING]
-      }
+      },
+      isDisabled: true
     }
   ];
 
+  const [tasks, setTasks] = useState(initialTasks);
+
+  const handleExpanderClick = (task) => {
+    setTasks(tasks.map(t => 
+      t.id === task.id 
+        ? { ...t, hideChildren: !t.hideChildren } 
+        : t
+    ));
+  };
+
   return (
     <div className="space-y-6">
-      {/* Project Overview Section */}
       <Card>
         <CardHeader>
           <CardTitle>Project Overview</CardTitle>
@@ -242,12 +282,12 @@ const ProjectDetail = () => {
         </CardContent>
       </Card>
 
-      {/* Gantt Chart Section */}
       <Card>
         <CardHeader>
           <CardTitle>Project Timeline</CardTitle>
         </CardHeader>
         <CardContent>
+          <style>{customGanttStyles}</style>
           <div className="w-full">
             <Gantt
               tasks={tasks}
@@ -255,30 +295,68 @@ const ProjectDetail = () => {
               listCellWidth="155px"
               columnWidth={columnWidth}
               ganttHeight={400}
-              onDateChange={(task, start, end) => {
-                console.log('Date Change:', task, start, end);
-              }}
-              onProgressChange={(task, progress) => {
-                console.log('Progress Change:', task, progress);
-              }}
-              onExpanderClick={(task) => {
-                console.log('Expander Click:', task);
-              }}
-              onDoubleClick={(task) => {
-                console.log('Double Click:', task);
-              }}
-              onClick={(task) => {
-                console.log('Click:', task);
-              }}
+              headerHeight={50}
+              rowHeight={50}
+              todayColor="rgba(252, 211, 77, 0.15)"
+              TaskListHeader={({ headerHeight = 50 }) => (
+                <div style={{
+                  height: `${headerHeight}px`,
+                  padding: '0 12px',
+                  fontWeight: 'bold',
+                  background: '#f5f5f5',
+                  borderBottom: '1px solid #e0e0e0',
+                  width: '155px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  boxSizing: 'border-box'
+                }}>
+                  Task
+                </div>
+              )}
+              TaskListTable={({ tasks, fontFamily, fontSize, rowHeight }) => (
+                <div style={{ width: '155px', fontFamily, fontSize }}>
+                  {tasks.map(task => (
+                    <div 
+                      key={task.id}
+                      style={{
+                        height: `${rowHeight}px`,
+                        padding: '0 12px',
+                        borderBottom: '1px solid #eee',
+                        display: 'flex',
+                        alignItems: 'center',
+                        paddingLeft: task.type === 'project' ? '12px' : '24px',
+                        fontWeight: task.type === 'project' ? 'bold' : 'normal',
+                        boxSizing: 'border-box',
+                      }}
+                    >
+                      {task.hideChildren !== undefined && (
+                        <span 
+                          onClick={() => handleExpanderClick(task)}
+                          style={{
+                            cursor: 'pointer',
+                            marginRight: '6px',
+                            display: 'inline-flex',
+                          }}
+                        >
+                          {task.hideChildren ? '▶' : '▼'}
+                        </span>
+                      )}
+                      <span>{task.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              onExpanderClick={handleExpanderClick}
+              onDateChange={() => {}}
+              onProgressChange={() => {}}
+              onDoubleClick={() => {}}
+              onClick={() => {}}
             />
           </div>
         </CardContent>
       </Card>
 
-      {/* Task Details Section */}
-              <TaskDetailsTable />
-        
-
+      <TaskDetailsTable />
     </div>
   );
 };
