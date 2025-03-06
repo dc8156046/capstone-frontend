@@ -1,10 +1,16 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Gantt, ViewMode } from 'gantt-task-react';
 import "gantt-task-react/dist/index.css";
 import TaskDetailsTable from '@/components/task_details/task-details-table';
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Pencil, Save, Trash2 } from 'lucide-react';
 
 const customGanttStyles = `
   .gantt-header-month {
@@ -35,6 +41,8 @@ const statusColors = {
 
 const ProjectDetail = () => {
   const [view, setView] = useState(ViewMode.Day);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   
   let columnWidth = 60;
   if (view === ViewMode.Year) {
@@ -45,7 +53,7 @@ const ProjectDetail = () => {
     columnWidth = 250;
   }
   
-  const projectData = {
+  const [projectData, setProjectData] = useState({
     id: 1,
     name: "SAIT Sports Center",
     address: "1301 16 Ave NW, Calgary, AB T2M 0L4",
@@ -55,7 +63,7 @@ const ProjectDetail = () => {
     end_date: "2025-09-30",
     company_id: 1,
     current_assignee: 1,
-  };
+  });
 
   const initialTasks = [
     {
@@ -237,6 +245,7 @@ const ProjectDetail = () => {
   ];
 
   const [tasks, setTasks] = useState(initialTasks);
+  const [editedProject, setEditedProject] = useState({...projectData});
 
   const handleExpanderClick = (task) => {
     setTasks(tasks.map(t => 
@@ -246,40 +255,167 @@ const ProjectDetail = () => {
     ));
   };
 
+  const handleDeleteProject = () => {
+    console.log("Deleting project with ID:", projectData.id);
+    alert("Project successfully deleted!");
+    setDeleteDialogOpen(false);
+  };
+
+  const handleEditToggle = () => {
+    if (editMode) {
+      setProjectData({...editedProject});
+    }
+    setEditMode(!editMode);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
+    if (name === 'budget') {
+      setEditedProject({
+        ...editedProject,
+        [name]: Number(value) || 0
+      });
+    } else {
+      setEditedProject({
+        ...editedProject,
+        [name]: value
+      });
+    }
+  };
+
+  const handleStatusChange = (e) => {
+    setEditedProject({
+      ...editedProject,
+      status: e.target.value
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Project Overview</CardTitle>
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={handleEditToggle}
+            >
+              {editMode ? <Save className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+            </Button>
+            <Button 
+              variant="destructive" 
+              size="icon" 
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="space-y-1">
               <p className="text-sm font-normal text-muted-foreground">Project Name</p>
-              <p className="text-lg font-medium">{projectData.name}</p>
+              {editMode ? (
+                <Input 
+                  name="name"
+                  value={editedProject.name}
+                  onChange={handleInputChange}
+                  className="text-base"
+                />
+              ) : (
+                <p className="text-lg font-medium">{projectData.name}</p>
+              )}
             </div>
             <div className="space-y-1">
               <p className="text-sm font-normal text-muted-foreground">Project Address</p>
-              <p className="text-lg font-medium">{projectData.address}</p>
+              {editMode ? (
+                <Input 
+                  name="address"
+                  value={editedProject.address}
+                  onChange={handleInputChange}
+                  className="text-base"
+                />
+              ) : (
+                <p className="text-lg font-medium">{projectData.address}</p>
+              )}
             </div>
             <div className="space-y-1">
               <p className="text-sm font-normal text-muted-foreground">Budget</p>
-              <p className="text-lg font-medium">${projectData.budget.toLocaleString()}</p>
+              {editMode ? (
+                <Input 
+                  name="budget"
+                  type="number"
+                  value={editedProject.budget}
+                  onChange={handleInputChange}
+                  className="text-base"
+                />
+              ) : (
+                <p className="text-lg font-medium">${projectData.budget.toLocaleString()}</p>
+              )}
             </div>
             <div className="space-y-1">
               <p className="text-sm font-normal text-muted-foreground">Start Date</p>
-              <p className="text-lg font-medium">{new Date(projectData.start_date).toLocaleDateString()}</p>
+              {editMode ? (
+                <Input 
+                  name="start_date"
+                  type="date"
+                  value={editedProject.start_date}
+                  onChange={handleInputChange}
+                  className="text-base"
+                />
+              ) : (
+                <p className="text-lg font-medium">{new Date(projectData.start_date).toLocaleDateString()}</p>
+              )}
             </div>
             <div className="space-y-1">
               <p className="text-sm font-normal text-muted-foreground">End Date</p>
-              <p className="text-lg font-medium">{new Date(projectData.end_date).toLocaleDateString()}</p>
+              {editMode ? (
+                <Input 
+                  name="end_date"
+                  type="date"
+                  value={editedProject.end_date}
+                  onChange={handleInputChange}
+                  className="text-base"
+                />
+              ) : (
+                <p className="text-lg font-medium">{new Date(projectData.end_date).toLocaleDateString()}</p>
+              )}
             </div>
             <div className="space-y-1">
               <p className="text-sm font-normal text-muted-foreground">Status</p>
-              <p className="text-lg font-medium capitalize">{projectData.status.replace('_', ' ')}</p>
+              {editMode ? (
+                <select
+                  name="status"
+                  value={editedProject.status}
+                  onChange={handleStatusChange}
+                  className="w-full rounded-md border border-input px-3 py-2 text-base"
+                >
+                  <option value={TaskStatus.PENDING}>Pending</option>
+                  <option value={TaskStatus.IN_PROGRESS}>In Progress</option>
+                  <option value={TaskStatus.COMPLETED}>Completed</option>
+                  <option value={TaskStatus.DELAYED}>Delayed</option>
+                </select>
+              ) : (
+                <p className="text-lg font-medium capitalize">{projectData.status.replace('_', ' ')}</p>
+              )}
             </div>
           </div>
         </CardContent>
+        {editMode && (
+          <CardFooter className="flex justify-end pt-0">
+            <Button variant="outline" onClick={() => {
+              setEditedProject({...projectData});
+              setEditMode(false);
+            }} className="mr-2">
+              Cancel
+            </Button>
+            <Button onClick={handleEditToggle}>
+              Save Changes
+            </Button>
+          </CardFooter>
+        )}
       </Card>
 
       <Card>
@@ -357,6 +493,23 @@ const ProjectDetail = () => {
       </Card>
 
       <TaskDetailsTable />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Project Deletion</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the project "{projectData.name}"? This action cannot be undone and all associated data will also be deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteProject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
