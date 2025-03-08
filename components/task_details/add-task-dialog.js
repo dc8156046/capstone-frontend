@@ -107,7 +107,7 @@ export function AddTaskDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add new task(s)</DialogTitle>
+          <DialogTitle>Add new tasks</DialogTitle>
           <DialogDescription>
             Create new tasks for an existing category in your project.
           </DialogDescription>

@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/collapsible";
 import { useState } from "react";
 
-// 定义侧边栏菜单项
 const sidebarNavItems = [
   {
     title: "Dashboard",

@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronDown, ChevronRight, Mail, Trash2, Plus } from "lucide-react";
+import {
+  HelpCircle,
+  ChevronDown,
+  ChevronRight,
+  Mail,
+  Trash2,
+  Plus,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -31,6 +38,13 @@ import DeleteDialog from "./delete-dialog";
 import { AddTaskDialog } from "./add-task-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
+
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -38,7 +52,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+// import { Label } from "@/components/ui/label";
 import { TableHeader } from "@/components/ui/table";
 
 const contractors = [
@@ -47,7 +61,7 @@ const contractors = [
 ];
 
 const statusOptions = [
-  { value: "normal", label: "Normal", color: "#78B7D0" },
+  { value: "in_progress", label: "In Progress", color: "#78B7D0" },
   { value: "pending", label: "Pending", color: "#979797" },
   { value: "delayed", label: "Delayed", color: "#F70E0E" },
   { value: "completed", label: "Completed", color: "#59BD50" },
@@ -58,10 +72,10 @@ const initialTasks = [
     id: "1",
     name: "Foundation",
     assignTo: "1",
-    status: "normal",
+    status: "pending",
     dueDate: new Date("2024-12-25"),
     budget: 20000,
-    debt: 5000,
+    pay_due: 5000,
     level: 0,
     children: [
       {
@@ -94,7 +108,7 @@ const initialTasks = [
     status: "pending",
     dueDate: new Date("2025-01-02"),
     budget: 15000,
-    debt: 0,
+    pay_due: 0,
     level: 0,
     dependence: "1",
     children: [
@@ -149,18 +163,16 @@ export function TaskDetailsTable() {
   });
   const [addTaskDialog, setAddTaskDialog] = useState(false);
   const [customColumns, setCustomColumns] = useState([]);
-  const [addColumnDialog, setAddColumnDialog] = useState(false);
-  const [newColumnName, setNewColumnName] = useState("");
+  //const [addColumnDialog, setAddColumnDialog] = useState(false);
+  //const [newColumnName, setNewColumnName] = useState("");
   const { toast } = useToast();
+  const [notesInput, setNotesInput] = useState({});
 
-  const formatAmount = (value) => {
-    if (!value) return "$ 0.00";
-    const numbers = value.replace(/[^\d.]/g, "");
-    const parts = numbers.split(".");
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    if (parts[1]) parts[1] = parts[1].slice(0, 2);
-    return `$ ${parts.join(".")}`;
-  };
+  const formatAmount = (value) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(value || 0);
 
   const renderEditableCell = (task, field) => {
     const isEditing =
@@ -179,7 +191,7 @@ export function TaskDetailsTable() {
         if (isEditing) {
           return (
             <Select
-              value={assignee}
+              value={task.assignTo || ""} // 确保默认值为空字符串
               onValueChange={(value) => {
                 setTasks((prevTasks) =>
                   updateTask(prevTasks, task.id, { assignTo: value })
@@ -192,14 +204,14 @@ export function TaskDetailsTable() {
                 }
               }}
             >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue>
-                  {assignee
-                    ? contractors.find((c) => c.id === assignee)?.name
-                    : "Select contractor"}
+              <SelectTrigger className="w-full max-w-[180px]">
+                <SelectValue placeholder="Select Contractor">
+                  {task.assignTo
+                    ? contractors.find((c) => c.id === task.assignTo)?.name
+                    : "Select Contractor"}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-full max-w-[180px]">
                 {contractors.map((contractor) => (
                   <SelectItem key={contractor.id} value={contractor.id}>
                     {contractor.name}
@@ -330,7 +342,7 @@ export function TaskDetailsTable() {
         );
 
       case "budget":
-      case "debt":
+      case "pay_due":
         return isEditing ? (
           <Input
             autoFocus
@@ -426,7 +438,7 @@ export function TaskDetailsTable() {
     return (
       <React.Fragment key={task.id}>
         <TableRow key={task.id}>
-          <TableCell className="font-medium border-r-2 border-black/10">
+          <TableCell className="font-medium border-r-2 border-black/10 text-center">
             <div className="flex items-center space-x-2">
               {hasChildren && (
                 <Button
@@ -455,36 +467,63 @@ export function TaskDetailsTable() {
               </span>
             </div>
           </TableCell>
-          <TableCell className="border-r border-black/5">
+          <TableCell className="border-r border-black/5 text-center">
             {renderEditableCell(task, "dependence")}
           </TableCell>
-          <TableCell className="border-r border-black/5">
+          <TableCell className="border-r border-black/5 text-center">
             {renderEditableCell(task, "assignTo")}
           </TableCell>
-          <TableCell className="border-r border-black/5">
+          <TableCell className="border-r border-black/5 text-center">
             {renderEditableCell(task, "status")}
           </TableCell>
-          <TableCell className="border-r border-black/5">
+          <TableCell className="border-r border-black/5 text-center">
             {renderEditableCell(task, "dueDate")}
           </TableCell>
-          <TableCell className="border-r border-black/5">
+          <TableCell className="border-r border-black/5 text-center">
             {renderEditableCell(task, "budget")}
           </TableCell>
-          <TableCell className="border-r border-black/5">
-            {renderEditableCell(task, "debt")}
+          <TableCell className="border-r border-black/5 text-center">
+            {renderEditableCell(task, "pay_due")}
+          </TableCell>
+          <TableCell className="border-r border-black/5 text-center relative group">
+            <div className="notes-cell">
+              {task.notes ? (
+                <span className="truncate">{task.notes}</span>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => {
+                    setNotesInput((prev) => ({
+                      ...prev,
+                      [task.id]: task.notes || "",
+                    }));
+                  }}
+                >
+                  +
+                </Button>
+              )}
+            </div>
+
+            {task.notes && (
+              <div className="absolute left-0 top-full w-max max-w-[300px] bg-white shadow-md border p-2 rounded-md hidden group-hover:block z-10">
+                {task.notes}
+              </div>
+            )}
           </TableCell>
           {customColumns.map((column, index) => (
             <TableCell
               key={column} // Ensure this key is unique as well
               className={cn(
-                "border-r border-black/5",
+                "border-r border-black/5 text-center",
                 index === customColumns.length - 1 && "border-r-0"
               )}
             >
               {renderEditableCell(task, column)}
             </TableCell>
           ))}
-          <TableCell>
+          <TableCell className="text-center">
             <Button
               variant="ghost"
               size="icon"
@@ -560,27 +599,20 @@ export function TaskDetailsTable() {
     if (success) {
       toast({
         title: "Success",
-        description: "Task(s) added successfully",
+        description: "Task added successfully",
+        duration: 3000,
       });
       setAddTaskDialog(false); // Close the dialog after successful addition
     }
     return success;
   };
 
-  const updateTask = (tasks, taskId, updates) => {
-    return tasks.map((task) => {
-      if (task.id === taskId) {
-        return { ...task, ...updates };
-      }
-      if (task.children) {
-        return {
-          ...task,
-          children: updateTask(task.children, taskId, updates),
-        };
-      }
-      return task;
-    });
-  };
+  const updateTask = (tasks, taskId, updates) =>
+    tasks.map((task) => ({
+      ...task,
+      ...(task.id === taskId ? updates : {}),
+      children: task.children ? updateTask(task.children, taskId, updates) : [],
+    }));
 
   const getAllTasks = () => {
     const flattenTasks = (tasks) => {
@@ -595,18 +627,19 @@ export function TaskDetailsTable() {
     return flattenTasks(tasks);
   };
 
-  const getTaskNameById = (taskId) => {
-    const task = getAllTasks().find((t) => t.id === taskId);
-    return task ? task.name : "Unknown";
-  };
+  const getTaskNameById = (taskId) =>
+    getAllTasks().reduce(
+      (acc, t) => (t.id === taskId ? t.name : acc),
+      "Unknown"
+    );
 
-  const handleAddColumn = () => {
-    if (newColumnName && !customColumns.includes(newColumnName)) {
-      setCustomColumns([...customColumns, newColumnName]);
-      setNewColumnName("");
-      setAddColumnDialog(false);
-    }
-  };
+  // const handleAddColumn = () => {
+  //   if (newColumnName && !customColumns.includes(newColumnName)) {
+  //     setCustomColumns([...customColumns, newColumnName]);
+  //     setNewColumnName("");
+  //     setAddColumnDialog(false);
+  //   }
+  // };
 
   const removeTask = (tasks, taskId) => {
     return tasks.reduce((acc, task) => {
@@ -634,50 +667,69 @@ export function TaskDetailsTable() {
           <Plus className="mr-2 h-4 w-4" /> Add Task
         </Button>
       </div>
-      <div className="rounded-lg border bg-white overflow-hidden shadow-lg">
+      <div className="rounded-2xl  border bg-white overflow-hidden shadow-lg">
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="w-full min-w-[1000px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="border-r-2 border-black/10">
+                <TableHead className="border-r-2 border-black/10 min-w-[150px] text-center">
                   Task
                 </TableHead>
-                <TableHead className="border-r border-black/5">
+                <TableHead className="border-r border-black/5 min-w-[150px] text-center">
                   Dependence
                 </TableHead>
-                <TableHead className="border-r border-black/5">
+                <TableHead className="border-r border-black/5 min-w-[120px] text-center">
                   Assign To
                 </TableHead>
-                <TableHead className="border-r border-black/5">
+                <TableHead className="border-r border-black/5 min-w-[120px] text-center">
                   Status
                 </TableHead>
-                <TableHead className="border-r border-black/5">
+                <TableHead className="border-r border-black/5 min-w-[120px] text-center">
                   Due Date
                 </TableHead>
-                <TableHead className="border-r border-black/5">
+                <TableHead className="border-r border-black/5 min-w-[120px] text-center">
                   Budget
                 </TableHead>
-                <TableHead className="border-r border-black/5">Debt</TableHead>
-                {customColumns.map((column, index) => (
+                <TableHead className="border-r border-black/5 min-w-[120px] text-center">
+                  Amount Due
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <HelpCircle className="h-4 w-4 ml-1 inline-block" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          Amount Due = Budget * Current task completion
+                          percentage.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableHead>
+                <TableHead className="border-r border-black/5 min-w-[120px] text-center">
+                  Notes
+                </TableHead>
+                {/* {customColumns.map((column, index) => (
                   <TableHead
                     key={column}
                     className={cn(
-                      "border-r border-black/5",
+                      "border-r border-black/5 w-20",
                       index === customColumns.length - 1 && "border-r-0"
                     )}
                   >
                     {column}
                   </TableHead>
-                ))}
-                <TableHead>
-                  <Button
+                ))} */}
+                <TableHead className="border-r border-black/5 min-w-[100px]">
+                  Delete
+                  {/* <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setAddColumnDialog(true)}
                     className="h-8 w-8 p-0"
                   >
                     <Plus className="h-4 w-4" />
-                  </Button>
+                  </Button> */}
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -724,6 +776,7 @@ export function TaskDetailsTable() {
             toast({
               title: "Success",
               description: "Task deleted successfully",
+              duration: 3000,
             });
           }
         }}
@@ -738,7 +791,49 @@ export function TaskDetailsTable() {
         tasks={tasks}
       />
 
-      <Dialog open={addColumnDialog} onOpenChange={setAddColumnDialog}>
+      {Object.entries(notesInput).map(([taskId, value]) => (
+        <Dialog
+          key={taskId}
+          open={notesInput[taskId] !== undefined}
+          onOpenChange={() => {
+            setNotesInput((prev) => {
+              const updated = { ...prev };
+              delete updated[taskId];
+              return updated;
+            });
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Notes Here</DialogTitle>
+            </DialogHeader>
+            <Input
+              value={value || ""}
+              onChange={(e) => {
+                const val = e.target.value.slice(0, 200);
+                setNotesInput((prev) => ({ ...prev, [taskId]: val }));
+              }}
+              placeholder="Enter up to 200 characters"
+            />
+            <DialogFooter>
+              <Button
+                className="bg-[#227B94] text-white"
+                onClick={() => {
+                  setTasks((prevTasks) =>
+                    updateTask(prevTasks, taskId, { notes: value })
+                  );
+                  setNotesInput((prev) => ({ ...prev, [taskId]: undefined }));
+                }}
+              >
+                {" "}
+                Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ))}
+
+      {/* <Dialog open={addColumnDialog} onOpenChange={setAddColumnDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Column</DialogTitle>
@@ -768,7 +863,7 @@ export function TaskDetailsTable() {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 }
