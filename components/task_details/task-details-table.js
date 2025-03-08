@@ -52,7 +52,6 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-// import { Label } from "@/components/ui/label";
 import { TableHeader } from "@/components/ui/table";
 
 const contractors = [
@@ -178,6 +177,7 @@ export function TaskDetailsTable() {
     const isEditing =
       editingCell.taskId === task.id && editingCell.field === field;
 
+    // assign to contractor
     switch (field) {
       case "assignTo":
         const assignee =
@@ -191,7 +191,7 @@ export function TaskDetailsTable() {
         if (isEditing) {
           return (
             <Select
-              value={task.assignTo || ""} // 确保默认值为空字符串
+              value={task.assignTo || ""}
               onValueChange={(value) => {
                 setTasks((prevTasks) =>
                   updateTask(prevTasks, task.id, { assignTo: value })
@@ -431,6 +431,7 @@ export function TaskDetailsTable() {
     );
   };
 
+  //table row
   const renderTask = (task) => {
     const isExpanded = expandedTasks.includes(task.id);
     const hasChildren = task.children && task.children.length > 0;
@@ -545,6 +546,7 @@ export function TaskDetailsTable() {
     );
   };
 
+  //add task
   const handleAddTask = async (category, taskNames, insertAfter) => {
     if (category === "new") {
       const newCategory = {
@@ -607,6 +609,7 @@ export function TaskDetailsTable() {
     return success;
   };
 
+  //update task
   const updateTask = (tasks, taskId, updates) =>
     tasks.map((task) => ({
       ...task,
@@ -614,6 +617,7 @@ export function TaskDetailsTable() {
       children: task.children ? updateTask(task.children, taskId, updates) : [],
     }));
 
+  //get all tasks
   const getAllTasks = () => {
     const flattenTasks = (tasks) => {
       return tasks.reduce((acc, task) => {
@@ -627,6 +631,7 @@ export function TaskDetailsTable() {
     return flattenTasks(tasks);
   };
 
+  //get task name by id
   const getTaskNameById = (taskId) =>
     getAllTasks().reduce(
       (acc, t) => (t.id === taskId ? t.name : acc),
@@ -641,6 +646,7 @@ export function TaskDetailsTable() {
   //   }
   // };
 
+  //remove task
   const removeTask = (tasks, taskId) => {
     return tasks.reduce((acc, task) => {
       if (task.id === taskId) {
@@ -667,6 +673,7 @@ export function TaskDetailsTable() {
           <Plus className="mr-2 h-4 w-4" /> Add Task
         </Button>
       </div>
+
       <div className="rounded-2xl  border bg-white overflow-hidden shadow-lg">
         <div className="overflow-x-auto">
           <Table className="w-full min-w-[1000px]">
