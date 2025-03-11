@@ -55,6 +55,12 @@ export default function Home() {
         localStorage.setItem("email", email);
       }
       alert("Login successful");
+      /*if (response.type == "admin"){
+        router.push("/dashboard")
+      }else{
+        router.push("/contr")
+      }
+        */
       router.push("/dashboard");
     } catch (error) {
       console.error(error);

@@ -9,7 +9,7 @@ export const userAPI = {
   updateUser: (id, data) => apiService.put(`/users/${id}`, data),
   deleteUser: (id) => apiService.delete(`/users/${id}`),
   signUp: (email, password, companyName) => 
-    apiService.postForm("/auth/signup", { username: email, password: password, company: companyName}),
+    apiService.post("/auth/signup", { email: email, password: password, company: companyName}),
   forgotPassword: (email) =>
-    apiService.postForm("/auth/forgot-password", { username: email}),
+    apiService.post("/auth/forgot-password", { email: email}),
 };
