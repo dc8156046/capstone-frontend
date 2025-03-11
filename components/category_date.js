@@ -16,16 +16,23 @@ const xLabels = [
 
 export default function DateChart() {
   return (
-    <LineChart
-      width={500}
-      height={300}
-      series={[
-        { data: pData, label: 'pv', yAxisId: 'leftAxisId' },
-        { data: uData, label: 'uv', yAxisId: 'rightAxisId' },
-      ]}
-      xAxis={[{ scaleType: 'point', data: xLabels }]}
-      yAxis={[{ id: 'leftAxisId' }, { id: 'rightAxisId' }]}
-      rightAxis="rightAxisId"
-    />
+    <div className="bg-white p-4 rounded-lg shadow ">
+      <h2 className="text-xl font-bold text-[#444444] mb-4">
+      {" "}
+      Project Category Duration Comparison
+      </h2>
+      
+      <LineChart
+        width={500}
+        height={300}
+        series={[
+          { data: pData, label: 'pv', yAxisId: 'leftAxisId' },
+          { data: uData, label: 'uv', yAxisId: 'rightAxisId' },
+        ]}
+        xAxis={[{ scaleType: 'point', data: xLabels }]}
+        yAxis={[{ id: 'leftAxisId' }, { id: 'rightAxisId' }]}
+        rightAxis="rightAxisId"
+      />
+    </div>
   );
 }
