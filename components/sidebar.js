@@ -34,14 +34,6 @@ const sidebarNavItems = [
         title: "User List",
         href: "/dashboard/users",
       },
-      {
-        title: "Roles",
-        href: "/dashboard/users/roles",
-      },
-      {
-        title: "Permissions",
-        href: "/dashboard/users/permissions",
-      },
     ],
   },
   {
