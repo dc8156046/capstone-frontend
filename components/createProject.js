@@ -6,6 +6,8 @@ import React, { useState } from "react";
 import { Calendar } from "react-calendar"; // Ensure react-calendar is installed
 import "react-calendar/dist/Calendar.css";
 // import { AddTaskDialog } from './addTask';
+import { apiService } from "@/services/http"; 
+import { projectAPI } from '@/services/createProject'; 
 
 const allTasks = {
   foundation: ["Pin Footing", "Footing Forms with Rebar", "Footing Pour","Wall Forms and Rebar","Wall Pours","Strip Forms","Crane Forms","Tap Spray","Weeping Tile and Gravel","Foundation Inspection","Excavation Backfill"],
@@ -104,6 +106,7 @@ const CreateProject = () => {
   // };
 
   //API connect:
+  const [loading, setLoading] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -134,6 +137,7 @@ const CreateProject = () => {
     
     // If all checks pass, proceed to API call
     try {
+      setLoading(true);
       // Create a formatted payload object
       const payload = {
         name: projectData.name,
@@ -147,8 +151,8 @@ const CreateProject = () => {
         tasks: projectData.tasks
       };
       
-      // Make API call to create project
-      const response = await apiClient.post('/projects', payload);
+      // Make API call to create project using projectAPI service
+      const response = await projectAPI.createProject(payload);
       
       // Handle successful response
       toast.success("Project created successfully!");
@@ -176,6 +180,8 @@ const CreateProject = () => {
         // Something happened in setting up the request
         toast.error("Error setting up request. Please try again.");
       }
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -363,7 +369,7 @@ const CreateProject = () => {
         
         <div className="flex justify-end space-x-4 mt-6">
           <button type="button" onClick={handleCancel} className="bg-gray-500 text-white px-6 py-2 rounded">Cancel</button>
-          <button type="submit" onClick={handleSubmit} className="bg-blue-500 text-white px-6 py-2 rounded">Create</button>
+          <button type="submit" onClick={handleSubmit} disabled={loading} className="bg-blue-500 text-white px-6 py-2 rounded"> {loading ? "Creating..." : "Create"}</button>
         </div>
       </form>
     </div>
