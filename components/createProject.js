@@ -103,64 +103,141 @@ const CreateProject = () => {
   //   });
   // };
 
-  const handleSubmit = (e) => {
+  //API connect:
+  const handleSubmit = async (e) => {
     e.preventDefault();
-     // Ensure that the form is valid before proceeding
+    
+    // Form validation (keep your existing validation)
     const form = e.target;
-
-    // Check if the form is valid
     if (!form.checkValidity()) {
-      // Trigger built-in form validation
       toast.error("Please fill in all required fields correctly.");
       return;
     }
-
-    // Check if the project name is empty
+    
+    // Additional validations (keep your existing validations)
     if (!projectData.name || projectData.name.trim() === "") {
       toast.error("Project Name cannot be empty.");
       return;
     }
-
-    // Check if the project address is empty
+    
     if (!projectData.address || projectData.address.trim() === "") {
       toast.error("Project Address cannot be empty.");
       return;
     }
-
-    // Check if the budget is empty or negative
+    
     if (!projectData.budget || projectData.budget < 0) {
-      toast.error("Budget cannot be empty or negative.");
+      toast.error("Budget cannot be negative.");
       return;
     }
-    // Validate Project Name
-    if (projectData.name.length > 50) {
-      toast.error("Project Name cannot exceed 50 characters.");
-      return;
+    
+    // More validations...
+    
+    // If all checks pass, proceed to API call
+    try {
+      // Create a formatted payload object
+      const payload = {
+        name: projectData.name,
+        address: projectData.address,
+        city: projectData.city,
+        province: projectData.province,
+        budget: parseFloat(projectData.budget),
+        priority: projectData.priority,
+        duration: parseInt(projectData.duration),
+        startDate: startDate.toISOString(),
+        tasks: projectData.tasks
+      };
+      
+      // Make API call to create project
+      const response = await apiClient.post('/projects', payload);
+      
+      // Handle successful response
+      toast.success("Project created successfully!");
+      console.log('Project created:', response.data);
+      
+      // Redirect to the project details page or dashboard
+      setTimeout(() => {
+        window.location.href = `/projects/${response.data.id}`;
+        // Or just go to dashboard
+        // window.location.href = '/dashboard';
+      }, 2000);
+      
+    } catch (error) {
+      // Handle API errors
+      console.error("Error creating project:", error);
+      
+      if (error.response) {
+        // The server responded with a status code outside the 2xx range
+        const errorMessage = error.response.data.message || "Failed to create project. Please try again.";
+        toast.error(errorMessage);
+      } else if (error.request) {
+        // The request was made but no response was received
+        toast.error("No response from server. Please check your connection.");
+      } else {
+        // Something happened in setting up the request
+        toast.error("Error setting up request. Please try again.");
+      }
     }
-
-    // Validate Address
-    if (projectData.address.length > 100) {
-      toast.error("Project Address cannot exceed 100 characters.");
-      return;
-    }
-
-    // Validate Budget (should not be negative)
-    if (projectData.budget < 0) {
-      toast.error("Budget cannot be a negative number.");
-      return;
-    }
-
-    // Validate Duration (should not be negative)
-    if (projectData.duration < 0) {
-      toast.error("Duration cannot be a negative number.");
-      return;
-    }
-
-    // If all checks pass
-    console.log(projectData);
-    toast.success("Project Created!");
-    window.location.href = '#';
   };
+
+  //before API:
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //    // Ensure that the form is valid before proceeding
+  //   const form = e.target;
+
+  //   // Check if the form is valid
+  //   if (!form.checkValidity()) {
+  //     // Trigger built-in form validation
+  //     toast.error("Please fill in all required fields correctly.");
+  //     return;
+  //   }
+
+  //   // Check if the project name is empty
+  //   if (!projectData.name || projectData.name.trim() === "") {
+  //     toast.error("Project Name cannot be empty.");
+  //     return;
+  //   }
+
+  //   // Check if the project address is empty
+  //   if (!projectData.address || projectData.address.trim() === "") {
+  //     toast.error("Project Address cannot be empty.");
+  //     return;
+  //   }
+
+  //   // Check if the budget is empty or negative
+  //   if (!projectData.budget || projectData.budget < 0) {
+  //     toast.error("Budget cannot be empty or negative.");
+  //     return;
+  //   }
+  //   // Validate Project Name
+  //   if (projectData.name.length > 50) {
+  //     toast.error("Project Name cannot exceed 50 characters.");
+  //     return;
+  //   }
+
+  //   // Validate Address
+  //   if (projectData.address.length > 100) {
+  //     toast.error("Project Address cannot exceed 100 characters.");
+  //     return;
+  //   }
+
+  //   // Validate Budget (should not be negative)
+  //   if (projectData.budget < 0) {
+  //     toast.error("Budget cannot be a negative number.");
+  //     return;
+  //   }
+
+  //   // Validate Duration (should not be negative)
+  //   if (projectData.duration < 0) {
+  //     toast.error("Duration cannot be a negative number.");
+  //     return;
+  //   }
+
+  //   // If all checks pass
+  //   console.log(projectData);
+  //   toast.success("Project Created!");
+  //   window.location.href = '#';
+  // };
 
 
 
