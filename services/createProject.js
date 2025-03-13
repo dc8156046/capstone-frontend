@@ -6,7 +6,7 @@ export const projectAPI = {
   createProject: (projectData) => apiService.post('/projects', projectData),
   
   // Get a specific project by ID
-  getProject: (id) => apiService.get(`/projects/${id}`),
+  getProject: (id) => apiService.post(`/projects/${id}`),
   
   // Update an existing project
   updateProject: (id, data) => apiService.put(`/projects/${id}`, data),
@@ -15,13 +15,16 @@ export const projectAPI = {
   deleteProject: (id) => apiService.delete(`/projects/${id}`),
   
   // Get all projects with optional query parameters
-  getAllProjects: (params) => apiService.get('/projects', params),
+  getAllProjects: () => apiService.post('/projects', {}),
+
+  //Get all tasks
+  getAllTasks: () => apiService.post('/tasks/', {}),
+
+  getAllProvinces: () => apiService.post('/provinces/', {}),
   
-  // Additional methods as needed for your application
-  // For example:
-  assignUserToProject: (projectId, userId) => 
-    apiService.post(`/projects/${projectId}/assign`, { userId }),
-    
+  // Get cities by province
+  getCitiesByProvince: (province_id) => apiService.post(`/provinces/${province_id}/cities`, {}),
+  
   completeProject: (projectId) => 
     apiService.put(`/projects/${projectId}/complete`),
 };
