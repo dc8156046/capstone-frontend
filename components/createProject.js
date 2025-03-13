@@ -24,7 +24,7 @@ const CreateProject = () => {
     city: 0,
     province: 0,
     budget: 0,
-    priority: "Low",
+    priority: "low",
     duration: "",
     task_ids: [],
   });
@@ -117,17 +117,17 @@ const CreateProject = () => {
   const handleTaskSelection = (categoryId, taskId) => {
     setProjectData((prevData) => {
       const currentTaskIds = [...(prevData.task_ids || [])];
-      
+
       // Check if the task is already selected
       const taskIndex = currentTaskIds.indexOf(taskId);
-      
+
       // If task is already selected, remove it, otherwise add it
       if (taskIndex !== -1) {
         currentTaskIds.splice(taskIndex, 1);
       } else {
         currentTaskIds.push(taskId);
       }
-      
+
       return {
         ...prevData,
         task_ids: currentTaskIds,
@@ -139,16 +139,16 @@ const CreateProject = () => {
   const handleCategorySelection = (categoryId) => {
     const category = tasks.find((cat) => cat.id === categoryId);
     if (!category) return;
-    
+
     setProjectData((prevData) => {
       const currentTaskIds = [...(prevData.task_ids || [])];
       const categoryTaskIds = category.children.map((task) => task.id);
-      
+
       // Check if all category tasks are already selected
-      const allSelected = categoryTaskIds.every((taskId) => 
+      const allSelected = categoryTaskIds.every((taskId) =>
         currentTaskIds.includes(taskId)
       );
-      
+
       let updatedTaskIds;
       if (allSelected) {
         // If all tasks are selected, remove them all
@@ -164,7 +164,7 @@ const CreateProject = () => {
           }
         });
       }
-      
+
       return {
         ...prevData,
         task_ids: updatedTaskIds,
@@ -183,24 +183,24 @@ const CreateProject = () => {
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-  
+
     // Skip province and city as they are handled by specific functions
-    if (name === 'province' || name === 'city') return;
-    
-    setProjectData(prev => ({ ...prev, [name]: value }));
+    if (name === "province" || name === "city") return;
+
+    setProjectData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleProvinceChange = async (e) => {
     const provinceId = e.target.value;
-    setProjectData(prev => ({ ...prev, province: provinceId }));
-    
+    setProjectData((prev) => ({ ...prev, province: provinceId }));
+
     // Fetch cities for the selected province
     await fetchCitiesForProvince(provinceId);
   };
-  
+
   const handleCityChange = (e) => {
     const cityId = e.target.value;
-    setProjectData(prev => ({ ...prev, city: cityId }));
+    setProjectData((prev) => ({ ...prev, city: cityId }));
   };
 
   // Handle date changes
@@ -255,9 +255,9 @@ const CreateProject = () => {
 
       console.log("Payload:", payload);
       // Make API call to create project
-      const response = await projectAPI.createProject();
+      const response = await projectAPI.createProject(payload);
       // Handle successful response
-      toast.success("Project created successfully!"); 
+      toast.success("Project created successfully!");
       console.log("Project created:", response.data);
 
       // Redirect to the project details page or dashboard
@@ -370,8 +370,8 @@ const CreateProject = () => {
                     <input
                       type="radio"
                       name="priority"
-                      value="Low"
-                      checked={projectData.priority === "Low"}
+                      value="low"
+                      checked={projectData.priority === "low"}
                       onChange={handleInputChange}
                       className="mr-2"
                     />
@@ -381,8 +381,8 @@ const CreateProject = () => {
                     <input
                       type="radio"
                       name="priority"
-                      value="Normal"
-                      checked={projectData.priority === "Normal"}
+                      value="medium"
+                      checked={projectData.priority === "medium"}
                       onChange={handleInputChange}
                       className="mr-2"
                     />
@@ -392,8 +392,8 @@ const CreateProject = () => {
                     <input
                       type="radio"
                       name="priority"
-                      value="High"
-                      checked={projectData.priority === "High"}
+                      value="high"
+                      checked={projectData.priority === "high"}
                       onChange={handleInputChange}
                       className="mr-2"
                     />
@@ -462,8 +462,7 @@ const CreateProject = () => {
                       <input
                         type="checkbox"
                         checked={
-                          projectData.task_ids.includes(task.id) ||
-                          false
+                          projectData.task_ids.includes(task.id) || false
                         }
                         onChange={() =>
                           handleTaskSelection(category.id, task.id)
