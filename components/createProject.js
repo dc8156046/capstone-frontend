@@ -23,7 +23,7 @@ const CreateProject = () => {
     address: "",
     city: 0,
     province: 0,
-    budget: "",
+    budget: 0,
     priority: "Low",
     duration: "",
     task_ids: [],
@@ -244,21 +244,20 @@ const CreateProject = () => {
       const payload = {
         name: projectData.name,
         address: projectData.address,
-        city: projectData.city,
-        province: projectData.province,
+        city_id: projectData.city,
+        province_id: projectData.province,
         budget: parseFloat(projectData.budget),
         priority: projectData.priority,
-        duration: parseInt(projectData.duration),
-        startDate: startDate.toISOString(),
+        estimated_duration: parseInt(projectData.duration),
+        start_date: startDate.toISOString(),
         task_ids: projectData.task_ids,
       };
 
       console.log("Payload:", payload);
       // Make API call to create project
-      const response = await projectAPI.createProject(JSON.stringify(payload));
-
+      const response = await projectAPI.createProject();
       // Handle successful response
-      toast.success("Project created successfully!");
+      toast.success("Project created successfully!"); 
       console.log("Project created:", response.data);
 
       // Redirect to the project details page or dashboard

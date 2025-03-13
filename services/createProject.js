@@ -3,7 +3,7 @@ import { apiService } from "./http";
 
 export const projectAPI = {
   // Create a new project
-  createProject: (projectData) => apiService.post('/projects', projectData),
+  createProject: (projectData) => apiService.post('/projects/', projectData),
   
   // Get a specific project by ID
   getProject: (id) => apiService.post(`/projects/${id}`),
@@ -15,10 +15,10 @@ export const projectAPI = {
   deleteProject: (id) => apiService.delete(`/projects/${id}`),
   
   // Get all projects with optional query parameters
-  getAllProjects: () => apiService.post('/projects', {}),
+  getAllProjects: () => apiService.post('/projects/all', {}),
 
   //Get all tasks
-  getAllTasks: () => apiService.post('/tasks/', {}),
+  getAllTasks: () => apiService.post('/tasks/all', {}),
 
   getAllProvinces: () => apiService.post('/provinces/', {}),
   
