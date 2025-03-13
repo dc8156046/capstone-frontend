@@ -4,7 +4,7 @@ import axios from "axios";
 const apiClient = axios.create({
   baseURL:
     process.env.NEXT_PUBLIC_API_BASE_URL ||
-    "https://brickbyclick-backend-production.up.railway.app",
+    "https://frank-cardinal-smooth.ngrok-free.app",
   timeout: 5000,
 });
 
