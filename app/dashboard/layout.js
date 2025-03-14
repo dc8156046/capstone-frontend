@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Footer } from "@/components/footer";
 import { CircleHelp } from "lucide-react";
 export default function DashboardLayout({ children }) {
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -17,12 +18,12 @@ export default function DashboardLayout({ children }) {
           </Link>
           <MainNav className="mx-6" />
           <div className="ml-auto flex items-center space-x-4">
-            <Link href="/dashboard/help-page">
+            <Link href="/help-page">
             <button>
               <CircleHelp />
             </button>
             </Link>
-            <UserNav />
+            <UserNav/>
           </div>
         </div>
       </header>

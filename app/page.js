@@ -24,9 +24,16 @@ export default function Home() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const type = localStorage.getItem("type");
     if (token) {
+      if (type === "admin") {
       router.push("/dashboard");
+    } else if (type === "contractor") {
+      router.push("/contractor-page");
+    } else {
+      alert("Failed to sign in.");
     }
+  }
   }, []);
 
   const handleLogin = async (e) => {
@@ -49,25 +56,30 @@ export default function Home() {
     setLoading(true);
     try {
       const response = await userAPI.login(email, password);
-      //console.log(response);
+      console.log(response);
       if (typeof window !== "undefined") {
         localStorage.setItem("token", response.access_token);
         localStorage.setItem("email", email);
+        localStorage.setItem("type", response.type);
       }
       alert("Login successful");
-      /*if (response.type == "admin"){
-        router.push("/dashboard")
-      }else{
-        router.push("/contr")
+      if(response.type === "admin"){
+        router.push("/dashboard");
+      }else if (response.type === "contractor"){
+        router.push("/contractor-page");
+      }else {
+        alert("Failed to login");
       }
-        */
-      router.push("/dashboard");
     } catch (error) {
       console.error(error);
+      alert("Failed to login. Please try again");
     }
-    setEmail("");
-    setPassword("");
-    setLoading(false);
+    finally{
+      setEmail("");
+      setPassword("");
+      setLoading(false);
+    }
+    
   };
 
   return (

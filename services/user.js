@@ -12,9 +12,10 @@ export const userAPI = {
     apiService.post("/auth/signup", { email: email, password: password, company: companyName}),
   forgotPassword: (email) =>
     apiService.post("/auth/forgot-password", { email: email}),
-  /*verifyCode: (code) => 
+  verifyCode: (email, code) => 
     apiService.post("/auth/verify-code", {email: email, code: code}),
   resetPassword: (email, password) =>
     apiService.post("/auth/reset-password", {email: email, password: password}),
-  */
+  getContractorProjects: () =>
+    apiService.post("/projects/contractor"),
 };
