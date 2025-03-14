@@ -13,40 +13,130 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Mail } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { taskDetailAPI } from "@/services/taskDetail";
 
 export default function ReminderDialog({
   open,
   onOpenChange,
   contractor,
   taskName,
+  projectId,
+  onSend,
 }) {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [projectDetails, setProjectDetails] = useState({
+    name: "",
+    start_date: "",
+    address: "",
+    company: "",
+  });
   const { toast } = useToast();
 
+  // 获取项目详情
   useEffect(() => {
-    if (contractor) {
-      setSubject(`Reminder: Task "${taskName}" Update Required`);
+    if (open && projectId) {
+      const fetchProjectDetails = async () => {
+        try {
+          const details = await taskDetailAPI.getProjectDetail(projectId);
+          setProjectDetails({
+            name: details.name || "",
+            start_date: details.start_date
+              ? new Date(details.start_date).toLocaleDateString()
+              : "",
+            address: details.address || "",
+            company: details.company || "",
+          });
+        } catch (error) {
+          console.error("Error fetching project details:", error);
+          toast({
+            title: "Error",
+            description: "Could not fetch project details",
+            variant: "destructive",
+          });
+        }
+      };
+
+      fetchProjectDetails();
+    }
+  }, [open, projectId, toast]);
+
+  useEffect(() => {
+    if (contractor && projectDetails.name) {
+      setSubject(
+        `Notification of Upcoming Work on "${projectDetails.name}" Project`
+      );
       setMessage(
         `Dear ${contractor.name},
 
 I hope this message finds you well.
-
-I am writing to remind you about the task "${taskName}" that requires your attention. Please update the status or provide any necessary information.
+I am writing to inform you that work on "${
+          projectDetails.name
+        }" is scheduled to commence soon. ${
+          taskName ? `Your task "${taskName}" ` : "The task "
+        }requires your attention.
+${
+  projectDetails.start_date
+    ? `The start date is set for "${projectDetails.start_date}"`
+    : ""
+}${
+          projectDetails.address
+            ? `, and the location for the project will be at "${projectDetails.address}"`
+            : ""
+        }.
+If you have any questions or need further clarification, feel free to reach out. We look forward to a successful collaboration.
 
 Best regards,
-Project Manager`
+${projectDetails.company}`
       );
     }
-  }, [contractor, taskName]);
+  }, [contractor, taskName, projectDetails]);
 
   const handleSend = async () => {
-    // Here you would implement the email sending logic
-    onOpenChange(false);
-    toast({
-      title: "Success",
-      description: "Reminder email sent successfully",
-    });
+    if (!subject || !message) {
+      toast({
+        title: "Error",
+        description: "Subject and message cannot be empty",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      // 准备邮件内容
+      const emailContent = {
+        title: subject,
+        content: message,
+        userId: contractor.id,
+        email: contractor.email,
+        taskName: taskName,
+        projectName: projectDetails.name,
+      };
+
+      // 调用API发送邮件
+      await taskDetailAPI.sendEmail(projectId, emailContent);
+
+      // 关闭对话框并通知父组件
+      onOpenChange(false);
+      if (onSend) onSend(true);
+
+      toast({
+        title: "Success",
+        description: "Reminder email sent successfully",
+      });
+    } catch (error) {
+      console.error("Error sending email:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send reminder email",
+        variant: "destructive",
+      });
+      if (onSend) onSend(false);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   if (!contractor) {
@@ -116,8 +206,9 @@ Project Manager`
           <Button
             onClick={handleSend}
             className="bg-[#227B94] hover:bg-[#227B94]/90"
+            disabled={isSending}
           >
-            Send
+            {isSending ? "Sending..." : "Send"}
           </Button>
         </div>
       </DialogContent>

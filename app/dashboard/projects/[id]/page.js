@@ -1,6 +1,7 @@
 "use client";
 
 import TaskDetailsTable from "@/components/task_details/task-details-table";
+import TaskDetailsTable1 from "@/components/task_details/task_details_table_1";
 
 export default function ProjectDetailPage() {
   return (
@@ -19,7 +20,7 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Task Details Table */}
-      <TaskDetailsTable />
+      <TaskDetailsTable1 />
     </div>
   );
 }

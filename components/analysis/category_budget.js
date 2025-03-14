@@ -36,7 +36,7 @@ export default function CategoryBudget({ title, selectedProject }) {
           data: chartData,
         },
       ]}
-      width={400}
+      width={500}
       height={200}
     />
   );

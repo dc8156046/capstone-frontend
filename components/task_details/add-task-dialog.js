@@ -21,34 +21,165 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { Plus, Minus } from "lucide-react";
 import PropTypes from "prop-types";
+import { taskDetailAPI } from "@/services/taskDetail";
 
-export function AddTaskDialog({
-  open,
-  onOpenChange,
-  onAddTask,
-  categories,
-  tasks,
-}) {
-  const [category, setCategory] = useState("");
-  const [taskNames, setTaskNames] = useState([""]);
-  const [insertAfter, setInsertAfter] = useState(null);
+export function AddTaskDialog({ open, onOpenChange, onAddTask, projectId }) {
+  const [selectedParent, setSelectedParent] = useState("");
+  const [taskNames, setTaskNames] = useState([""]); //subtask names
+  const [insertAfter, setInsertAfter] = useState("atTheEnd");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [subtasks, setSubtasks] = useState([]); // insert after subtasks
+  const [parentOptions, setParentOptions] = useState([]); // parent tasks
+  const [hasLoadedParents, setHasLoadedParents] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (open) {
-      setCategory("");
+      setSelectedParent("");
       setTaskNames([""]);
-      setInsertAfter(null);
+      setInsertAfter("atTheEnd");
+      setSubtasks([]);
+      setHasLoadedParents(false);
     }
   }, [open]);
 
+  // load parent tasks
+  useEffect(() => {
+    if (!open || hasLoadedParents) return;
+
+    const loadParentOptions = async () => {
+      try {
+        const response = await taskDetailAPI.getCategory();
+        const parentNames = Array.isArray(response)
+          ? response.map((cat) => cat.name)
+          : [];
+        console.log("Loaded parent options:", parentNames);
+        setParentOptions(parentNames);
+        setHasLoadedParents(true);
+      } catch (error) {
+        console.error("Failed to load parent options:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load parent options",
+        });
+      }
+    };
+
+    loadParentOptions();
+  }, [open, hasLoadedParents, toast]);
+
+  // load subtasks for Insert After
+  useEffect(() => {
+    if (!selectedParent || selectedParent === "new" || !projectId) {
+      console.log("Skipping loadSubtasks: parent or projectId missing", {
+        selectedParent,
+        projectId,
+      });
+      setSubtasks([]);
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadSubtasks = async () => {
+      try {
+        console.log("Fetching project details for projectId:", projectId);
+        const projectData = await taskDetailAPI.getProjectDetail(projectId);
+        console.log("Project data:", projectData);
+
+        if (!projectData || !Array.isArray(projectData.tasks)) {
+          console.error("Invalid project data or tasks array:", projectData);
+          if (isMounted) {
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Failed to load project data",
+            });
+            setSubtasks([]);
+          }
+          return;
+        }
+
+        console.log("Searching for parent:", selectedParent);
+        const selectedTask = projectData.tasks.find(
+          (t) => t.task && t.task.name === selectedParent
+        );
+        console.log("Selected task:", selectedTask);
+
+        if (
+          !selectedTask ||
+          !selectedTask.task.id ||
+          selectedTask.task.id <= 0
+        ) {
+          console.error("Parent not found or invalid task ID:", selectedParent);
+          if (isMounted) {
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Parent not found or invalid task ID",
+            });
+            setSubtasks([]);
+          }
+          return;
+        }
+
+        console.log("Fetching subtasks for taskId:", selectedTask.task.id);
+        const response = await taskDetailAPI.getSubtask(selectedTask.task.id);
+        console.log("Subtasks response:", response);
+
+        const subtasksData = Array.isArray(response)
+          ? response.map(({ task, project_task }) => ({
+              id: task.id,
+              name: task.name,
+              parentId: task.parent_id,
+              assignTo: project_task.assignee_id,
+              status: project_task.status,
+              dueDate: project_task.end_date
+                ? new Date(project_task.end_date)
+                : null,
+              budget: project_task.budget,
+              pay_due: project_task.amount_due,
+              dependence: project_task.dependency,
+              notes: project_task.notes,
+            }))
+          : [];
+
+        console.log("Formatted subtasks:", subtasksData);
+
+        if (isMounted) {
+          setSubtasks(subtasksData);
+          if (subtasksData.length === 0) {
+            console.warn("No subtasks found for this parent");
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load subtasks:", error);
+        if (isMounted) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to load subtasks for this parent",
+          });
+          setSubtasks([]);
+        }
+      }
+    };
+
+    loadSubtasks();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedParent, projectId, toast]);
+
+  // handle form submission
   const handleSubmit = async () => {
-    if (!category) {
+    if (!selectedParent) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please select a category",
+        description: "Please select a parent task",
       });
       return;
     }
@@ -63,90 +194,92 @@ export function AddTaskDialog({
     }
 
     setIsSubmitting(true);
-    const success = await onAddTask(
-      category,
-      taskNames.filter((name) => name.trim()),
-      insertAfter
-    );
-    setIsSubmitting(false);
-
-    if (success) {
+    try {
+      const success = await onAddTask(
+        selectedParent,
+        taskNames.filter((name) => name.trim()),
+        insertAfter === "atTheEnd" ? null : insertAfter
+      );
+      if (success) {
+        toast({ title: "Success", description: "Tasks added successfully" });
+        onOpenChange(false);
+      }
+    } catch (error) {
       toast({
-        title: "Success",
-        description: "Tasks added successfully",
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add tasks",
       });
-      onOpenChange(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const addTaskNameField = () => {
-    setTaskNames([...taskNames, ""]);
-  };
-
+  const addTaskNameField = () => setTaskNames([...taskNames, ""]);
   const updateTaskName = (index, value) => {
     const newTaskNames = [...taskNames];
     newTaskNames[index] = value;
     setTaskNames(newTaskNames);
   };
-
   const removeTaskNameField = (index) => {
-    if (taskNames.length > 1) {
-      const newTaskNames = taskNames.filter((_, i) => i !== index);
-      setTaskNames(newTaskNames);
-    }
-  };
-
-  const getInsertOptions = () => {
-    const selectedCategory = tasks.find((task) => task.name === category);
-    return selectedCategory
-      ? [selectedCategory, ...(selectedCategory.children || [])]
-      : [];
+    if (taskNames.length > 1)
+      setTaskNames(taskNames.filter((_, i) => i !== index));
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-md md:max-w-lg">
         <DialogHeader>
           <DialogTitle>Add new tasks</DialogTitle>
           <DialogDescription>
-            Create new tasks for an existing category in your project.
+            Create new tasks for an existing parent in your project.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="category">Category</Label>
-            <Select value={category} onValueChange={setCategory}>
+            <Label htmlFor="parent">Parent Task</Label>
+            <Select value={selectedParent} onValueChange={setSelectedParent}>
               <SelectTrigger>
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder="Select parent task" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
+                {parentOptions.length > 0 ? (
+                  parentOptions.map((parent) => (
+                    <SelectItem key={parent} value={parent}>
+                      {parent}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="noParents" disabled>
+                    No parent tasks available
                   </SelectItem>
-                ))}
+                )}
               </SelectContent>
             </Select>
           </div>
 
-          {category && (
-            <div className="grid gap-2">
-              <Label htmlFor="insertAfter">Insert After</Label>
-              <Select value={insertAfter || ""} onValueChange={setInsertAfter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select position" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="atTheEnd">At the end</SelectItem>
-                  {getInsertOptions().map((option) => (
-                    <SelectItem key={option.id} value={option.id}>
-                      {option.name}
+          <div className="grid gap-2">
+            <Label htmlFor="insertAfter">Insert After</Label>
+            <Select value={insertAfter} onValueChange={setInsertAfter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select position" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="atTheEnd">At the end</SelectItem>
+                {subtasks.length > 0 ? (
+                  subtasks.map((subtask) => (
+                    <SelectItem key={subtask.id} value={subtask.id.toString()}>
+                      {subtask.name}
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+                  ))
+                ) : (
+                  <SelectItem value="noSubtasks" disabled>
+                    No subtasks available
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
 
           {taskNames.map((taskName, index) => (
             <div key={index} className="grid gap-2">
@@ -199,13 +332,7 @@ AddTaskDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   onOpenChange: PropTypes.func.isRequired,
   onAddTask: PropTypes.func.isRequired,
-  categories: PropTypes.arrayOf(PropTypes.string).isRequired,
-  tasks: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      children: PropTypes.array,
-      level: PropTypes.number.isRequired,
-    })
-  ).isRequired,
+  projectId: PropTypes.string.isRequired,
 };
+
+export default AddTaskDialog;
