@@ -237,7 +237,7 @@ const CreateProject = () => {
       };
       
       // Make API call to create project using projectAPI service
-      const response = await projectAPI.createProject(payload);
+      const response = await projectAPI.createProject(JSON.stringify(payload));
       
       // Handle successful response
       toast.success("Project created successfully!");
