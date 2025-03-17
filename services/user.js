@@ -18,4 +18,6 @@ export const userAPI = {
     apiService.post("/auth/reset-password", {email: email, password: password}),
   getContractorProjects: () =>
     apiService.post("/projects/contractor"),
+  getAllProjects: () =>
+    apiService.post("/projects/all"),
 };
