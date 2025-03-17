@@ -59,8 +59,11 @@ const ProjectDetail = () => {
     status: TaskStatus.PENDING,
     start_date: "",
     end_date: "",
+    actual_end_date: "",
     company_id: 1,
     current_assignee: 0,
+    city_id: 0,
+    province_id: 0,
   });
   
   const [editedProject, setEditedProject] = useState({});
@@ -114,8 +117,11 @@ const ProjectDetail = () => {
           status: project.status,
           start_date: project.start_date?.split('T')[0] || "",
           end_date: project.end_date?.split('T')[0] || "",
+          actual_end_date: project.actual_end_date?.split('T')[0] || "",
           company_id: project.company_id,
           current_assignee: project.current_assignee,
+          city_id: project.city_id || 0,
+          province_id: project.province_id || 0,
         });
         
         setEditedProject({
@@ -126,8 +132,11 @@ const ProjectDetail = () => {
           status: project.status,
           start_date: project.start_date?.split('T')[0] || "",
           end_date: project.end_date?.split('T')[0] || "",
+          actual_end_date: project.actual_end_date?.split('T')[0] || "",
           company_id: project.company_id,
           current_assignee: project.current_assignee,
+          city_id: project.city_id || 0,
+          province_id: project.province_id || 0,
         });
         
         const ganttTasks = transformTasksForGantt(projectTasks);
@@ -279,41 +288,55 @@ const ProjectDetail = () => {
         return;
       }
       
+      // Prepare the complete request data with all required fields
+      const requestData = {
+        name: editedProject.name,
+        address: editedProject.address,
+        budget: Number(editedProject.budget),
+        status: editedProject.status,
+        start_date: editedProject.start_date,
+        end_date: editedProject.end_date,
+        actual_end_date: editedProject.actual_end_date,
+        company_id: editedProject.company_id,
+        current_assignee: editedProject.current_assignee,
+        city_id: editedProject.city_id || 1,  // Default to 1 if not available
+        province_id: editedProject.province_id || 1  // Default to 1 if not available
+      };
+      
+      console.log('Sending update request with data:', requestData);
+      
       const response = await fetch(`${CONFIG.API_BASE_URL}/projects/${projectId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          name: editedProject.name,
-          address: editedProject.address,
-          budget: Number(editedProject.budget),
-          status: editedProject.status,
-          current_assignee: editedProject.current_assignee
-        })
+        body: JSON.stringify(requestData)
       });
       
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('API error response:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
         throw new Error(`Error: ${response.status} - ${errorText || response.statusText}`);
       }
       
       const responseText = await response.text();
       const updatedProject = JSON.parse(responseText);
       
+      // Update the local state with all the changes
       setProjectData({
         ...projectData,
-        name: editedProject.name,
-        address: editedProject.address,
-        budget: Number(editedProject.budget),
-        status: editedProject.status,
-        current_assignee: editedProject.current_assignee
+        ...requestData
       });
       
       setEditMode(false);
       alert("Project updated successfully!");
     } catch (err) {
+      console.error('Update project error:', err);
       alert(`Failed to update project: ${err.message}`);
     } finally {
       setSaving(false);
@@ -449,7 +472,7 @@ const ProjectDetail = () => {
               )}
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-normal text-muted-foreground">End Date</p>
+              <p className="text-sm font-normal text-muted-foreground">Planned End Date</p>
               {editMode ? (
                 <Input 
                   name="end_date"
@@ -460,6 +483,20 @@ const ProjectDetail = () => {
                 />
               ) : (
                 <p className="text-lg font-medium">{projectData.end_date ? new Date(projectData.end_date).toLocaleDateString() : "Not set"}</p>
+              )}
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-normal text-muted-foreground">Actual End Date</p>
+              {editMode ? (
+                <Input 
+                  name="actual_end_date"
+                  type="date"
+                  value={editedProject.actual_end_date}
+                  onChange={handleInputChange}
+                  className="text-base"
+                />
+              ) : (
+                <p className="text-lg font-medium">{projectData.actual_end_date ? new Date(projectData.actual_end_date).toLocaleDateString() : "Not set"}</p>
               )}
             </div>
             <div className="space-y-1">
