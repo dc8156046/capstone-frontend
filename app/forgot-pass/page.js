@@ -20,6 +20,7 @@ export default function ForgotPassword() {
     setError("");
 
     try {
+      //console.log(email);
       const response = await userAPI.forgotPassword(email);
       console.log(response);
       router.push(`/verify-code?email=${encodeURIComponent(email)}`);

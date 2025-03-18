@@ -10,10 +10,12 @@ export const userAPI = {
   deleteUser: (id) => apiService.delete(`/users/${id}`),
   signUp: (email, password, companyName) => 
     apiService.post("/auth/signup", { email: email, password: password, company: companyName}),
+  activateAccount: (token) => 
+    apiService.post("/auth/activate-account", {token: token}),
   forgotPassword: (email) =>
-    apiService.post("/auth/forgot-password", { email: email}),
-  verifyCode: (email, code) => 
-    apiService.post("/auth/verify-code", {email: email, code: code}),
+    apiService.post("/auth/forget-password", { email: email}),
+  verifyCode: (code) => 
+    apiService.post("/auth/verify-code?code=" + code),
   resetPassword: (email, password) =>
     apiService.post("/auth/reset-password", {email: email, password: password}),
   getContractorProjects: () =>

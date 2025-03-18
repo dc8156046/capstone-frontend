@@ -1,10 +1,13 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { userAPI } from "@/services";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-export default function VerifyCode({ email }) {
+export default function VerifyCode() {
+
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
   const router = useRouter();
   const [otp, setOtp] = useState(["", "", "", "", ""]); 
 
@@ -24,8 +27,9 @@ export default function VerifyCode({ email }) {
     const code = otp.join(""); 
 
     try {
-      const response = await userAPI.verifyCode(email, code);
-      console.log(response);
+      //console.log(code);
+      const response = await userAPI.verifyCode(code);
+      //console.log(response);
       router.push(`/reset-password?email=${encodeURIComponent(email)}`);
     } catch (error) {
       console.error(error);
@@ -60,6 +64,7 @@ export default function VerifyCode({ email }) {
         <p className="mt-4 text-center text-sm">
           Haven't got the email yet?{" "}
           <button className="text-blue-500 hover:underline">Resend email</button>
+          {/* call forget pass api method again ! */}
         </p>
       </div>
     </div>

@@ -1,12 +1,16 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { userAPI } from "@/services";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 
-export default function ResetPassword({ email }) {
+export default function ResetPassword() {
+
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
+  console.log(email);
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
@@ -21,7 +25,9 @@ export default function ResetPassword({ email }) {
     }
 
     try {
+      console.log(email);
       const response = await userAPI.resetPassword(email, password);
+      
       console.log(response);
       router.push("/"); // Redirect to login page after successful reset
     } catch (error) {
