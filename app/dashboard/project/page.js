@@ -69,7 +69,7 @@ export default function ProjectListPage() {
               <div>{project.address}</div>
               <div>{project.start_date ? project.start_date.split("T")[0] : ""}</div>
               <div>{project.end_date ? project.end_date.split("T")[0] : ""}</div>
-              <div>{project.budget}</div>
+              <div>${project.budget}</div>
 
               <div className="flex items-center justify-center">
                 <div className="w-full bg-gray-200 rounded-full h-5 relative">
@@ -91,7 +91,7 @@ export default function ProjectListPage() {
               </div>
               
               <div
-                className={`text-sm text-white font-semibold px-2 py-1 rounded-full w-fit mx-auto ${
+                className={`text-sm font-semibold px-2 py-1 rounded-full w-fit mx-auto ${
                   project.status === "pending"
                     ? "text-gray-600"
                     : project.status === "in_progress"
