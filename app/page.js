@@ -131,7 +131,7 @@ export default function Home() {
               <Link
               href="/create-account"
               className="text-sm text-primary hover:underline">
-                Create an account
+                Sign up now
               </Link>
               <Link
                 href="/forgot-pass" 
