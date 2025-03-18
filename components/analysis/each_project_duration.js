@@ -4,7 +4,7 @@ import { BarChart } from "@mui/x-charts/BarChart";
 
 export default function EachProjectDuration() {
   const seriesNb = 2; // Number of series to display
-  const itemNb = 5; // Number of items to display
+  const itemNb = 10; // Number of items to display
   const skipAnimation = false; // Whether to skip animation
   const projectNames = [
     "Project A",
@@ -12,6 +12,12 @@ export default function EachProjectDuration() {
     "Project C",
     "Project D",
     "Project E",
+    "Project F",
+    "Project G",
+    "Project H",
+    "Project I",
+    "Project J",
+    "Project K",
   ];
 
   return (
@@ -42,16 +48,16 @@ const series = [
   {
     label: "Estimated Duration",
     data: [
-      651, 581, 764, 890, 600, 345, 1020, 1010, 620, 1269, 724, 999, 1188, 1210,
-      626, 630, 555, 516, 775, 516,
+      120, 1000, 764, 890, 600, 345, 1020, 1010, 620, 1269, 724, 999, 1188,
+      1210, 626, 630, 555, 516, 775, 516, 120, 1000,
     ],
     color: "#EAB308",
   },
   {
     label: "Actual Duration",
     data: [
-      660, 602, 800, 802, 624, 555, 958, 1024, 589, 1245, 720, 954, 1021, 1211,
-      658, 699, 501, 525, 748, 555,
+      200, 980, 800, 802, 624, 555, 958, 1024, 589, 1245, 720, 954, 1021, 1211,
+      658, 699, 501, 525, 748, 555, 200, 980,
     ],
     color: "#5CB5D9",
   },
