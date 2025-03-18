@@ -83,9 +83,13 @@ export function TaskDetailsTable1({ projectId }) {
 
   // Fetch initial data
   useEffect(() => {
+    console.log("useEffect received projectId:", projectId);
     const fetchInitialData = async () => {
       try {
         setLoading(true);
+        if (!projectId) {
+          throw new Error("No projectId provided");
+        }
         console.log(`Fetching project details for projectId: ${projectId}`);
         const projectData = await taskDetailAPI.getProjectDetail(projectId);
         console.log("Project data received:", projectData);
@@ -106,7 +110,7 @@ export function TaskDetailsTable1({ projectId }) {
               id: task.id,
               name: task.name,
               parentId: task.parent_id,
-              level: task.parent_id === 0 ? 0 : 1, // 仅用于渲染层级
+              level: task.parent_id === 0 ? 0 : 1,
               assignTo: project_task.assignee_id,
               status: project_task.status,
               dueDate: project_task.end_date
@@ -117,6 +121,7 @@ export function TaskDetailsTable1({ projectId }) {
               dependence: project_task.dependency,
               notes: project_task.notes,
               children: [],
+              sort_order: task.sort_order || 0,
             };
             taskMap.set(task.id, formattedTask);
           });
@@ -628,20 +633,34 @@ export function TaskDetailsTable1({ projectId }) {
 
   // API-integrated add task
   const handleAddTask = async (parentName, childrenNames, insertAfter) => {
+    console.log("handleAddTask called with projectId:", projectId);
+    if (!projectId) {
+      toast({
+        title: "Error",
+        description: "No project ID provided",
+        variant: "destructive",
+      });
+      return false;
+    }
     try {
-      // 查找现有的 parent（顶级任务）
       let parentTask = tasks.find(
         (task) => task.name === parentName && task.parentId === 0
       );
       let parentTaskId;
 
       if (!parentTask) {
-        // 如果 parent 不存在，创建一个新的顶级任务
-        const newParent = {
-          id: Date.now(), // 临时 ID，实际应由 API 返回
+        const newParentData = {
+          name: parentName,
+          parentId: 0,
+          sort_order: tasks.length + 1,
+        };
+        const response = await taskDetailAPI.addTask(projectId, newParentData);
+        parentTask = {
+          id: response.id,
           name: parentName,
           parentId: 0,
           level: 0,
+          children: [],
           assignTo: null,
           status: null,
           dueDate: null,
@@ -649,18 +668,40 @@ export function TaskDetailsTable1({ projectId }) {
           pay_due: null,
           dependence: null,
           notes: null,
-          children: [],
+          sort_order: newParentData.sort_order,
         };
-        setTasks((prevTasks) => [...prevTasks, newParent]);
-        parentTask = newParent;
-        parentTaskId = newParent.id;
+        setTasks((prevTasks) => [...prevTasks, parentTask]);
+        parentTaskId = parentTask.id;
       } else {
         parentTaskId = parentTask.id;
       }
 
-      const subtasksData = childrenNames.map((name) => ({
+      let sortOrder = 1;
+      let insertIndex = -1;
+      if (insertAfter && insertAfter !== "atTheEnd") {
+        const targetSubtask = parentTask.children.find(
+          (child) => child.id === parseInt(insertAfter)
+        );
+        if (targetSubtask) {
+          sortOrder = targetSubtask.sort_order + 1;
+          insertIndex =
+            parentTask.children.findIndex(
+              (t) => t.id === parseInt(insertAfter)
+            ) + 1;
+        }
+      } else {
+        sortOrder =
+          parentTask.children.length > 0
+            ? Math.max(
+                ...parentTask.children.map((child) => child.sort_order)
+              ) + 1
+            : 1;
+      }
+
+      const subtasksData = childrenNames.map((name, index) => ({
         name,
         parentId: parentTaskId,
+        sort_order: sortOrder + index,
       }));
 
       const response = await taskDetailAPI.createSubtask(
