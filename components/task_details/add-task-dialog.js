@@ -25,36 +25,38 @@ import { taskDetailAPI } from "@/services/taskDetail";
 
 export function AddTaskDialog({ open, onOpenChange, onAddTask, projectId }) {
   const [selectedParent, setSelectedParent] = useState("");
-  const [taskNames, setTaskNames] = useState([""]); //subtask names
-  const [insertAfter, setInsertAfter] = useState("atTheEnd");
+  const [selectedParentId, setSelectedParentId] = useState(null);
+  const [taskNames, setTaskNames] = useState([""]);
+  const [insertAfter, setInsertAfter] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [subtasks, setSubtasks] = useState([]); // insert after subtasks
-  const [parentOptions, setParentOptions] = useState([]); // parent tasks
+  const [parentOptions, setParentOptions] = useState([]);
   const [hasLoadedParents, setHasLoadedParents] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (open) {
       setSelectedParent("");
+      setSelectedParentId(null);
       setTaskNames([""]);
-      setInsertAfter("atTheEnd");
+      setInsertAfter("");
       setSubtasks([]);
       setHasLoadedParents(false);
     }
   }, [open]);
 
-  // load parent tasks
+  // 加载父任务选项
   useEffect(() => {
     if (!open || hasLoadedParents) return;
 
     const loadParentOptions = async () => {
       try {
         const response = await taskDetailAPI.getCategory();
-        const parentNames = Array.isArray(response)
-          ? response.map((cat) => cat.name)
+        const parentData = Array.isArray(response)
+          ? response.map((cat) => ({ id: cat.id, name: cat.name })) // 假设 API 返回 { id, name }
           : [];
-        console.log("Loaded parent options:", parentNames);
-        setParentOptions(parentNames);
+        console.log("Loaded parent options:", parentData);
+        setParentOptions(parentData);
         setHasLoadedParents(true);
       } catch (error) {
         console.error("Failed to load parent options:", error);
@@ -69,12 +71,10 @@ export function AddTaskDialog({ open, onOpenChange, onAddTask, projectId }) {
     loadParentOptions();
   }, [open, hasLoadedParents, toast]);
 
-  // load subtasks for Insert After
   useEffect(() => {
-    if (!selectedParent || selectedParent === "new" || !projectId) {
-      console.log("Skipping loadSubtasks: parent or projectId missing", {
-        selectedParent,
-        projectId,
+    if (!selectedParentId) {
+      console.log("Skipping loadSubtasks: parentId missing", {
+        selectedParentId,
       });
       setSubtasks([]);
       return;
@@ -84,64 +84,16 @@ export function AddTaskDialog({ open, onOpenChange, onAddTask, projectId }) {
 
     const loadSubtasks = async () => {
       try {
-        console.log("Fetching project details for projectId:", projectId);
-        const projectData = await taskDetailAPI.getProjectDetail(projectId);
-        console.log("Project data:", projectData);
-
-        if (!projectData || !Array.isArray(projectData.tasks)) {
-          console.error("Invalid project data or tasks array:", projectData);
-          if (isMounted) {
-            toast({
-              variant: "destructive",
-              title: "Error",
-              description: "Failed to load project data",
-            });
-            setSubtasks([]);
-          }
-          return;
-        }
-
-        console.log("Searching for parent:", selectedParent);
-        const selectedTask = projectData.tasks.find(
-          (t) => t.task && t.task.name === selectedParent
-        );
-        console.log("Selected task:", selectedTask);
-
-        if (
-          !selectedTask ||
-          !selectedTask.task.id ||
-          selectedTask.task.id <= 0
-        ) {
-          console.error("Parent not found or invalid task ID:", selectedParent);
-          if (isMounted) {
-            toast({
-              variant: "destructive",
-              title: "Error",
-              description: "Parent not found or invalid task ID",
-            });
-            setSubtasks([]);
-          }
-          return;
-        }
-
-        console.log("Fetching subtasks for taskId:", selectedTask.task.id);
-        const response = await taskDetailAPI.getSubtask(selectedTask.task.id);
+        console.log("Fetching subtasks for taskId:", selectedParentId);
+        const response = await taskDetailAPI.getSubtask(selectedParentId);
         console.log("Subtasks response:", response);
 
         const subtasksData = Array.isArray(response)
-          ? response.map(({ task, project_task }) => ({
+          ? response.map((task) => ({
               id: task.id,
               name: task.name,
               parentId: task.parent_id,
-              assignTo: project_task.assignee_id,
-              status: project_task.status,
-              dueDate: project_task.end_date
-                ? new Date(project_task.end_date)
-                : null,
-              budget: project_task.budget,
-              pay_due: project_task.amount_due,
-              dependence: project_task.dependency,
-              notes: project_task.notes,
+              sort_order: task.sort_order,
             }))
           : [];
 
@@ -171,9 +123,9 @@ export function AddTaskDialog({ open, onOpenChange, onAddTask, projectId }) {
     return () => {
       isMounted = false;
     };
-  }, [selectedParent, projectId, toast]);
+  }, [selectedParentId, toast]);
 
-  // handle form submission
+  // 处理表单提交
   const handleSubmit = async () => {
     if (!selectedParent) {
       toast({
@@ -226,6 +178,15 @@ export function AddTaskDialog({ open, onOpenChange, onAddTask, projectId }) {
       setTaskNames(taskNames.filter((_, i) => i !== index));
   };
 
+  useEffect(() => {
+    if (selectedParent) {
+      const parent = parentOptions.find((p) => p.name === selectedParent);
+      setSelectedParentId(parent ? parent.id : null);
+    } else {
+      setSelectedParentId(null);
+    }
+  }, [selectedParent, parentOptions]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md md:max-w-lg">
@@ -245,8 +206,8 @@ export function AddTaskDialog({ open, onOpenChange, onAddTask, projectId }) {
               <SelectContent>
                 {parentOptions.length > 0 ? (
                   parentOptions.map((parent) => (
-                    <SelectItem key={parent} value={parent}>
-                      {parent}
+                    <SelectItem key={parent.id} value={parent.name}>
+                      {parent.name}
                     </SelectItem>
                   ))
                 ) : (
@@ -265,7 +226,6 @@ export function AddTaskDialog({ open, onOpenChange, onAddTask, projectId }) {
                 <SelectValue placeholder="Select position" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="atTheEnd">At the end</SelectItem>
                 {subtasks.length > 0 ? (
                   subtasks.map((subtask) => (
                     <SelectItem key={subtask.id} value={subtask.id.toString()}>
