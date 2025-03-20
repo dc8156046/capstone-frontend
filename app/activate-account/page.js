@@ -8,21 +8,20 @@ import { userAPI } from "@/services";
 export default function ActivateAccount() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const token = searchParams.get("token"); // Extract the token from the URL
+    const token = searchParams.get("token");
 
     const handleActivation = async () => {
         try {
             const response = await userAPI.activateAccount(token); // Call the API
-            console.log(response); // Log the response
-            alert("Account activated successfully!"); // Show success message
-            router.push("/"); // Redirect to the home page
+            //console.log(response); 
+            alert("Account activated successfully!");
+            router.push("/"); 
         } catch (error) {
-            console.error("Activation failed:", error); // Log the error
-            alert("Activation failed. Please try again."); // Show error message
+            console.error("Activation failed:", error); 
+            alert("Activation failed. Please try again."); 
         }
     };
 
-    // Call handleActivation when the component mounts or when the token changes
     useEffect(() => {
         if (token) {
             handleActivation();
