@@ -33,14 +33,6 @@ const sidebarNavItems = [
         title: "User List",
         href: "/dashboard/users",
       },
-      {
-        title: "Roles",
-        href: "/dashboard/users/roles",
-      },
-      {
-        title: "Permissions",
-        href: "/dashboard/users/permissions",
-      },
     ],
   },
   {
@@ -54,6 +46,10 @@ const sidebarNavItems = [
       {
         title: "Project Detail",
         href: "/dashboard/project/detail",
+      },
+      {
+        title: "Project Detail",
+        href: "/dashboard/project/1",
       },
     ],
   },

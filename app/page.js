@@ -65,75 +65,65 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-      <Card className="w-full max-w-md">
+    <div className="h-screen flex overflow-hidden">
+    <div className="hidden md:flex flex-2 bg-cover bg-center h-full">
+    <img src="/loginBackground.jpg" alt="BackgroundImg"/>
+    </div>
+    <div className="flex-1 flex items-center justify-center bg-cyan-900 px-6 h-full">
+      <Card className="w-full max-w-md bg-white text-black">
         <CardHeader className="space-y-2">
           <CardTitle className="text-2xl font-bold text-center">
-            Login to BrickbyClick System
+            Login to BrickByClick
           </CardTitle>
           <CardDescription className="text-center">
-            Please enter your email and password
+            Enter your email and password
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-6" onSubmit={handleLogin}>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label
-                  htmlFor="email"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
+                <Label htmlFor="email" className="text-sm font-medium">
                   Email
                 </Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Please enter your email address"
+                  placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2"
                   required
                 />
               </div>
-
               <div className="space-y-2">
-                <Label
-                  htmlFor="password"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
+                <Label htmlFor="password" className="text-sm font-medium">
                   Password
                 </Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Please enter your password"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2"
                   required
                 />
               </div>
             </div>
-
             <div className="flex items-center justify-end">
               <Link
                 href="/forgot-password"
-                className="text-sm text-primary hover:text-primary/90 hover:underline"
+                className="text-sm text-primary hover:underline"
               >
                 Forgot password?
               </Link>
             </div>
-
-            <Button
-              className="w-full py-2 font-medium"
-              disabled={loading}
-              type="submit"
-            >
+            <Button className="w-full py-2 font-medium bg-cyan-700 hover:bg-cyan-600 text-white" disabled={loading} type="submit">
               {loading ? "Logging in..." : "Login"}
             </Button>
           </form>
         </CardContent>
       </Card>
     </div>
+  </div>
   );
 }
