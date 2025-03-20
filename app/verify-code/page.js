@@ -36,6 +36,14 @@ export default function VerifyCode() {
     }
   };
 
+  const handleResendEmail = async () => {
+    try {
+      await userAPI.forgotPassword(email);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-cyan-900">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
@@ -63,7 +71,9 @@ export default function VerifyCode() {
         </form>
         <p className="mt-4 text-center text-sm">
           Haven't got the email yet?{" "}
-          <button className="text-blue-500 hover:underline">Resend email</button>
+          <button type="submit" className="text-blue-500 hover:underline" onSubmit={handleResendEmail}>
+            Resend email
+          </button>
           {/* call forget pass api method again ! */}
         </p>
       </div>
