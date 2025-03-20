@@ -87,7 +87,7 @@ export default function HelpPage() {
           </div>
         </CardContent>
       </Card>
-
+      
       {/* Main Content */}
       <div className="flex-1 px-6 py-10 max-w-5xl mx-auto">
         {/* Back Button */}
