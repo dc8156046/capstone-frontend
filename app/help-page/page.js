@@ -255,7 +255,7 @@ export default function HelpPage() {
               href="mailto:BrickByClick@gmail.com"
               className="text-cyan-800 hover:underline text-base font-medium"
             >
-              BrickByClick@gmail.com
+            BrickByClick@outlook.com
             </a>
           </section>
         </div>
