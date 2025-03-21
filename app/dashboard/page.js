@@ -15,7 +15,25 @@ export default function DashboardPage() {
       try {
         const response = await userAPI.getAllProjects();
         console.log("Projects:", response);
-        setProjects(response);
+
+        const updateProjects = response.map(project => {
+          const progress = calculateProgress(project.start_date, project.end_date);
+          const startDate = new Date(project.start_date);
+          const endDate = new Date(project.end_date);
+          const currentDate = new Date();
+
+          if (progress === 100 && project.status !== "complete") {
+            return { ...project, status: "Complete" };
+          } else if (startDate && currentDate <= endDate) {
+            return { ...project, status: "In Progress" };
+          } else if (currentDate > endDate) {
+            return { ...project, status: "Delayed" };
+          } else {
+            return { ...project, status: "pending" };
+          }
+        });
+
+        setProjects(updateProjects);
       } catch (error) {
         console.error(error);
       } finally {
@@ -25,15 +43,6 @@ export default function DashboardPage() {
 
     fetchProjects();
   }, []);
-
-  const groupedProjects = {
-    "In Progress": [
-      ...projects.filter(p => p.status === "in_progress"),
-      ...projects.filter(p => p.status === "Delayed"),
-    ],
-    "Upcoming": projects.filter(p => p.status === "pending"),
-    "Complete": projects.filter(p => p.status === "Complete"),
-  };
 
   const calculateProgress = (start_date, end_date) => {
     if (!start_date || !end_date) return 0;
@@ -51,16 +60,22 @@ export default function DashboardPage() {
 
     return Math.round(progress);
   };
+  
+  const groupedProjects = {
+    "In Progress": projects.filter(project => project.status === "In Progress"),
+    "Upcoming": projects.filter(project => project.status === "pending"),
+    "Complete": projects.filter(project => project.status === "Complete"),
+    "Delayed": projects.filter(project => project.status === "Delayed")
+  };
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Dashboard</h1>
 
-        {/* add project button if there are existing projects */}
         {projects.length > 0 && (
           <button className="w-36 h-12 bg-cyan-800 text-white rounded-lg flex items-center justify-center space-x-2 hover:bg-cyan-700">
-            <Plus size={24}  className="border rounded-full bg-white text-cyan-700"/>
+            <Plus size={24} className="border rounded-full bg-white text-cyan-700" />
             <span className="text-lg font-semibold">Add Project</span>
           </button>
         )}
@@ -108,7 +123,7 @@ export default function DashboardPage() {
                       return (
                         <li key={project.id} className="p-4 bg-white shadow rounded-lg text-center">
                           <p className="text-lg font-bold">{project.name}</p>
-                          {/* Progress bar */}
+
                           {project.status !== "pending" && (
                             <div className="w-full bg-gray-200 rounded-full h-5 mt-2 relative">
                               <div
@@ -134,16 +149,15 @@ export default function DashboardPage() {
                             {project.end_date ? project.end_date.split("T")[0] : ""}
                           </p>
 
-                          {/* Status bar */}
                           <p
-                            className={`text-sm text-white rounded-full mt-3 ${
+                            className={`text-sm text-white rounded-full mt-3 py-1 ${
                               project.status === "pending"
                                 ? "bg-gray-600"
-                                : project.status === "in_progress"
+                                : project.status === "In Progress"
                                 ? "bg-cyan-600"
-                                : project.status === "completed"
+                                : project.status === "Complete"
                                 ? "bg-green-600"
-                                : project.status === "delayed"
+                                : project.status === "Delayed"
                                 ? "bg-red-600"
                                 : ""
                             }`}
