@@ -2,35 +2,55 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import Logo from "@/components/logo";
-import { CircleHelp } from "lucide-react";
+import { CircleHelp, ChevronDown, ChevronUp } from "lucide-react";
 import { UserNav } from "@/components/user-nav";
 import { useState, useEffect } from "react";
 import { userAPI } from "@/services";
 import Link from "next/link";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 
 export default function ContractorPage() {
   const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true); 
-  //const [error, setError] = useState(""); 
+  const [loading, setLoading] = useState(true);
+  const [openProjects, setOpenProjects] = useState({});
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         const response = await userAPI.getContractorProjects();
         setProjects(response);
+        const initialOpenState = {};
+        response.forEach(({ project }) => {
+          initialOpenState[project.id] = false;
+        });
+        setOpenProjects(initialOpenState);
       } catch (error) {
         console.error(error);
-        //setError("Failed to get projects. Please try again.");
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
     fetchProjects();
   }, []);
 
+  const toggleProject = (projectId) => {
+    setOpenProjects((prev) => ({
+      ...prev,
+      [projectId]: !prev[projectId],
+    }));
+  };
+
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -45,7 +65,7 @@ export default function ContractorPage() {
                 <CircleHelp className="h-5 w-5" />
               </button>
             </Link>
-            <UserNav/>
+            <UserNav />
           </div>
         </CardContent>
       </Card>
@@ -53,60 +73,97 @@ export default function ContractorPage() {
       {/* Main Content */}
       <div className="container mx-auto p-6 flex justify-center">
         <div className="w-full max-w-xl">
-          <h1 className="text-2xl font-bold mb-6 text-center">Your Projects</h1>
+          <h1 className="text-2xl font-bold mb-6 text-center">
+            Your Projects
+          </h1>
 
-          {/* Display Projects */}
           {projects.length > 0 ? (
             <div className="space-y-4">
               {projects.map(({ project, tasks }) => (
-                <Card key={project.id} className="shadow-md">
-                  <CardContent className="p-4">
-                    {/* Project Details */}
-                    <div className="space-y-2">
-                      <h2 className="text-lg font-semibold">{project.name}</h2>
-                      <p className="text-sm text-gray-600">
-                        Address: {project.address}, {project.city_id}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Due: {new Date(project.end_date).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Status:{" "}
-                        <span
-                          className={`px-2 py-1 text-sm rounded-full ${
-                            project.status === "Completed"
-                              ? "bg-green-100 text-green-800"
-                              : project.status === "In Progress"
-                              ? "bg-blue-100 text-blue-800"
-                              : project.status === "Delay" 
-                              ? "bg-red-100 text-red-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
+                <Collapsible
+                  key={project.id}
+                  open={openProjects[project.id]}
+                  onOpenChange={(isOpen) => {
+                    setOpenProjects((prev) => ({
+                      ...prev,
+                      [project.id]: isOpen,
+                    }));
+                  }}
+                >
+                  <Card className="shadow-md">
+                    <CardContent className="p-4">
+                      {/* Collapsible Trigger */}
+                      <CollapsibleTrigger asChild>
+                        <button
+                          className="w-full flex justify-between items-center text-left"
+                          aria-label="Toggle Project Details"
+                          onClick={() => toggleProject(project.id)} 
                         >
-                          {project.status}
-                        </span>
-                      </p>
-                    </div>
+                          <div>
+                            <h2 className="text-lg font-semibold">
+                              {project.name}
+                            </h2>
+                            <p className="text-sm text-gray-600">
+                              Address: {project.address}, {project.city_id}
+                            </p>
+                          </div>
+                          {openProjects[project.id] ? (
+                            <ChevronUp className="h-5 w-5" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5" />
+                          )}
+                        </button>
+                      </CollapsibleTrigger>
 
-                    {/* Task List */}
-                    <div className="mt-4 space-y-2">
-                      <h3 className="text-md font-medium">Tasks</h3>
-                      {tasks.length > 0 ? (
-                        <div className="space-y-2">
-                          {tasks.map((task) => (
-                            <div key={task.id} className="flex items-center gap-2">
-                              <span className="text-sm text-gray-800">
-                                {task.name}
-                              </span>
+                      {/* Collapsible Content */}
+                      <CollapsibleContent className="mt-4 space-y-2">
+                        <p className="text-sm text-gray-500">
+                          Due:{" "}
+                          {new Date(project.end_date).toLocaleDateString()}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Status:{" "}
+                          <span
+                            className={`px-2 py-1 text-sm rounded-full ${
+                              project.status === "Completed"
+                                ? "bg-green-100 text-green-800"
+                                : project.status === "In Progress"
+                                ? "bg-blue-100 text-blue-800"
+                                : project.status === "Delay"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {project.status}
+                          </span>
+                        </p>
+
+                        {/* Task List */}
+                        <div className="mt-4 space-y-2">
+                          <h3 className="text-md font-medium">Tasks</h3>
+                          {tasks.length > 0 ? (
+                            <div className="space-y-2">
+                              {tasks.map((task) => (
+                                <div
+                                  key={task.id}
+                                  className="flex items-center gap-2"
+                                >
+                                  <span className="text-sm text-gray-800">
+                                    {task.name}
+                                  </span>
+                                </div>
+                              ))}
                             </div>
-                          ))}
+                          ) : (
+                            <p className="text-sm text-gray-500">
+                              No tasks found.
+                            </p>
+                          )}
                         </div>
-                      ) : (
-                        <p className="text-sm text-gray-500">No tasks found.</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                      </CollapsibleContent>
+                    </CardContent>
+                  </Card>
+                </Collapsible>
               ))}
             </div>
           ) : (

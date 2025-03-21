@@ -40,6 +40,24 @@ export default function ProjectListPage() {
     return Math.round(progress);
   };
 
+  const calculateStatus = (start_date, end_date, progress) => {
+    if (!start_date || !end_date) return "Pending";
+  
+    const startDate = new Date(start_date);
+    const endDate = new Date(end_date);
+    const currentDate = new Date();
+  
+    if (progress === 100) return "Complete";
+    
+    if (currentDate < startDate) return "Pending";
+    
+    if (currentDate > endDate && progress < 100) return "Delayed";
+  
+    if (currentDate >= startDate && currentDate <= endDate) return "In Progress";
+  
+    return "Pending";
+  };
+
   return (
     <div className="p-6">
       <h2 className="font-bold text-2xl mt-4">Project List</h2>
@@ -59,6 +77,7 @@ export default function ProjectListPage() {
       ) : (
         projects.map((project) => {
           const progress = calculateProgress(project.start_date, project.end_date);
+          const status = calculateStatus(project.start_date, project.end_date, progress);
 
           return (
             <div
@@ -92,18 +111,18 @@ export default function ProjectListPage() {
               
               <div
                 className={`text-sm font-semibold px-2 py-1 rounded-full w-fit mx-auto ${
-                  project.status === "pending"
+                  status === "pending"
                     ? "text-gray-600"
-                    : project.status === "in_progress"
+                    : status === "In Progress"
                     ? "text-cyan-600"
-                    : project.status === "Complete"
+                    : status === "Complete"
                     ? "text-green-600"
-                    : project.status === "Delayed"
+                    : status === "Delayed"
                     ? "text-red-600"
-                    : "bg-gray-400"
+                    : ""
                 }`}
               >
-                {project.status}
+                {status}
               </div>
             </div>
           );
