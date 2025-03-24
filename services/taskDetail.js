@@ -4,6 +4,8 @@ import { apiService } from "./http"; // Import the apiService from services/http
 export const taskDetailAPI = {
   getUser: (id) => apiService.get(`/users/${id}`),
   getProjectDetail: (id) => apiService.post(`/projects/${id}`),
+  updateProject: (id, data) => apiService.put(`/projects/${id}`, data),
+  deleteProject: (id) => apiService.delete(`/projects/${id}`),
   addTask: (id, data) => apiService.post(`/projects/${id}/tasks`, data),
   updateTask: (id, taskId, data) =>
     apiService.put(`/projects/${id}/tasks/${taskId}`, data),

@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Pencil, Save, Trash2, Loader2 } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
-import CONFIG from "../../../config";
 import { taskDetailAPI } from "@/services/taskDetail";
 
 const customGanttStyles = `
@@ -108,25 +107,7 @@ const ProjectDetail = () => {
           return;
         }
 
-        const response = await taskDetailAPI.getProjectDetail(projectId); /* , {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }) */
-
-        /*  if (!response.ok) {
-          let errorText = await response.text();
-          throw new Error(
-            `API request failed with status ${response.status}: ${
-              errorText || response.statusText
-            }`
-          );
-        }
-
-        const responseText = await response.text();
-        const data = JSON.parse(responseText); */
-
+        const response = await taskDetailAPI.getProjectDetail(projectId);
         const { project, tasks: projectTasks } = response;
 
         setProjectData({
@@ -162,7 +143,7 @@ const ProjectDetail = () => {
         const ganttTasks = transformTasksForGantt(projectTasks);
         setTasks(ganttTasks);
       } catch (err) {
-        console.log(err);
+        console.error("Failed to load project data:", err);
         setError(`Failed to load project data: ${err.message}`);
       } finally {
         setLoading(false);
@@ -268,23 +249,12 @@ const ProjectDetail = () => {
         return;
       }
 
-      /*   const response = await fetch(taskDetailAPI.getProjectDetail), {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }); */
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Error: ${response.status} - ${errorText || response.statusText}`
-        );
-      }
+      await taskDetailAPI.deleteProject(projectId);
 
       alert("Project successfully deleted!");
       router.push("/dashboard/project");
     } catch (err) {
+      console.error("Delete project error:", err);
       alert(`Failed to delete project: ${err.message}`);
     } finally {
       setDeleteDialogOpen(false);
@@ -329,29 +299,7 @@ const ProjectDetail = () => {
 
       console.log("Sending update request with data:", requestData);
 
-      /*  const response = await taskDetailAPI.getProjectDetail, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestData),
-      }); */
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API error response:", {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText,
-        });
-        throw new Error(
-          `Error: ${response.status} - ${errorText || response.statusText}`
-        );
-      }
-
-      const responseText = await response.text();
-      const updatedProject = JSON.parse(responseText);
+      const updatedProject = await taskDetailAPI.updateProject(projectId, requestData);
 
       // Update the local state with all the changes
       setProjectData({
@@ -715,7 +663,7 @@ const ProjectDetail = () => {
         </CardContent>
       </Card>
 
-      {/* <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Project Deletion</AlertDialogTitle>
@@ -735,7 +683,7 @@ const ProjectDetail = () => {
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog> */}
+      </AlertDialog>
 
       {/* Task Details Table */}
       <TaskDetailsTable1 projectId={projectId} />
