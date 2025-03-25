@@ -4,9 +4,9 @@ import { Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { userAPI } from "@/services";
+import Link from "next/link";
 
 export default function DashboardPage() {
-
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -16,8 +16,11 @@ export default function DashboardPage() {
         const response = await userAPI.getAllProjects();
         console.log("Projects:", response);
 
-        const updateProjects = response.map(project => {
-          const progress = calculateProgress(project.start_date, project.end_date);
+        const updateProjects = response.map((project) => {
+          const progress = calculateProgress(
+            project.start_date,
+            project.end_date
+          );
           const startDate = new Date(project.start_date);
           const endDate = new Date(project.end_date);
           const currentDate = new Date();
@@ -37,7 +40,7 @@ export default function DashboardPage() {
       } catch (error) {
         console.error(error);
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
@@ -60,12 +63,14 @@ export default function DashboardPage() {
 
     return Math.round(progress);
   };
-  
+
   const groupedProjects = {
-    "In Progress": projects.filter(project => project.status === "In Progress"),
-    "Upcoming": projects.filter(project => project.status === "pending"),
-    "Complete": projects.filter(project => project.status === "Complete"),
-    "Delayed": projects.filter(project => project.status === "Delayed")
+    "In Progress": projects.filter(
+      (project) => project.status === "In Progress"
+    ),
+    Upcoming: projects.filter((project) => project.status === "pending"),
+    Complete: projects.filter((project) => project.status === "Complete"),
+    Delayed: projects.filter((project) => project.status === "Delayed"),
   };
 
   return (
@@ -74,16 +79,23 @@ export default function DashboardPage() {
         <h1 className="text-2xl font-bold">Dashboard</h1>
 
         {projects.length > 0 && (
-          <button className="w-36 h-12 bg-cyan-800 text-white rounded-lg flex items-center justify-center space-x-2 hover:bg-cyan-700">
-            <Plus size={24} className="border rounded-full bg-white text-cyan-700" />
-            <span className="text-lg font-semibold">Add Project</span>
-          </button>
+          <Link href="dashboard/project/create">
+            <button className="w-36 h-12 bg-cyan-800 text-white rounded-lg flex items-center justify-center space-x-2 hover:bg-cyan-700">
+              <Plus
+                size={24}
+                className="border rounded-full bg-white text-cyan-700"
+              />
+              <span className="text-lg font-semibold">Add Project</span>
+            </button>
+          </Link>
         )}
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center">
-          <span className="text-lg font-semibold text-gray-700">Loading Projects...</span>
+          <span className="text-lg font-semibold text-gray-700">
+            Loading Projects...
+          </span>
         </div>
       ) : (
         <>
@@ -92,15 +104,21 @@ export default function DashboardPage() {
               <h2 className="text-xl font-semibold">Project Overview</h2>
               <div className="grid grid-cols-4 gap-4 text-center">
                 <div className="p-4 bg-gray-100 rounded-xl text-black">
-                  <p className="text-lg font-bold">{groupedProjects["In Progress"].length}</p>
+                  <p className="text-lg font-bold">
+                    {groupedProjects["In Progress"].length}
+                  </p>
                   <p className="text-sm font-semibold">In Progress</p>
                 </div>
                 <div className="p-4 bg-gray-100 rounded-xl text-black">
-                  <p className="text-lg font-bold">{groupedProjects["Upcoming"].length}</p>
+                  <p className="text-lg font-bold">
+                    {groupedProjects["Upcoming"].length}
+                  </p>
                   <p className="text-sm font-semibold">Upcoming</p>
                 </div>
                 <div className="p-4 bg-gray-100 rounded-xl text-black">
-                  <p className="text-lg font-bold">{groupedProjects["Complete"].length}</p>
+                  <p className="text-lg font-bold">
+                    {groupedProjects["Complete"].length}
+                  </p>
                   <p className="text-sm font-semibold">Complete</p>
                 </div>
                 <div className="p-4 bg-gray-100 rounded-xl text-black">
@@ -117,11 +135,17 @@ export default function DashboardPage() {
                 <div key={status} className="space-y-4">
                   <h2 className="text-xl font-semibold">{status}</h2>
                   <ul className="space-y-2">
-                    {projectList.map(project => {
-                      const progress = calculateProgress(project.start_date, project.end_date);
+                    {projectList.map((project) => {
+                      const progress = calculateProgress(
+                        project.start_date,
+                        project.end_date
+                      );
 
                       return (
-                        <li key={project.id} className="p-4 bg-white shadow rounded-lg text-center">
+                        <li
+                          key={project.id}
+                          className="p-4 bg-white shadow rounded-lg text-center"
+                        >
                           <p className="text-lg font-bold">{project.name}</p>
 
                           {project.status !== "pending" && (
@@ -145,8 +169,13 @@ export default function DashboardPage() {
 
                           <p className="text-sm mt-2">{project.address}</p>
                           <p className="text-sm mt-2">
-                            {project.start_date ? project.start_date.split("T")[0] : ""} -{" "}
-                            {project.end_date ? project.end_date.split("T")[0] : ""}
+                            {project.start_date
+                              ? project.start_date.split("T")[0]
+                              : ""}{" "}
+                            -{" "}
+                            {project.end_date
+                              ? project.end_date.split("T")[0]
+                              : ""}
                           </p>
 
                           <p
@@ -173,10 +202,12 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <button className="w-32 h-32 flex items-center justify-center bg-cyan-800 text-white rounded-full shadow-lg hover:bg-cyan-700 mt-8">
-                <Plus size={64} />
-              </button>
-              <span className="mt-2 text-gray-700 text-lg">Add Project</span>
+              <Link href="dashboard/project/create">
+                <button className="w-32 h-32 flex items-center justify-center bg-cyan-800 text-white rounded-full shadow-lg hover:bg-cyan-700 mt-8">
+                  <Plus size={64} />
+                </button>
+                <span className="mt-2 text-gray-700 text-lg">Add Project</span>
+              </Link>
             </div>
           )}
         </>
