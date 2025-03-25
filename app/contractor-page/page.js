@@ -22,9 +22,20 @@ export default function ContractorPage() {
     const fetchProjects = async () => {
       try {
         const response = await userAPI.getContractorProjects();
-        setProjects(response);
+        console.log("Projects:", response);
+
+        const updatedProjects = response.map(({ project, tasks }) => ({
+          project: {
+            ...project,
+            status: determineProjectStatus(project.start_date, project.end_date),
+          },
+          tasks,
+        }));
+
+        setProjects(updatedProjects);
+
         const initialOpenState = {};
-        response.forEach(({ project }) => {
+        updatedProjects.forEach(({ project }) => {
           initialOpenState[project.id] = false;
         });
         setOpenProjects(initialOpenState);
@@ -37,6 +48,20 @@ export default function ContractorPage() {
 
     fetchProjects();
   }, []);
+
+  const determineProjectStatus = (start_date, end_date) => {
+    if (!start_date || !end_date) return "Pending";
+
+    const startDate = new Date(start_date);
+    const endDate = new Date(end_date);
+    const currentDate = new Date();
+
+    if (currentDate < startDate) return "Upcoming";
+    if (currentDate >= startDate && currentDate <= endDate) return "In Progress";
+    if (currentDate > endDate) return "Complete";
+
+    return "Pending";
+  };
 
   const toggleProject = (projectId) => {
     setOpenProjects((prev) => ({
@@ -80,24 +105,14 @@ export default function ContractorPage() {
           {projects.length > 0 ? (
             <div className="space-y-4">
               {projects.map(({ project, tasks }) => (
-                <Collapsible
-                  key={project.id}
-                  open={openProjects[project.id]}
-                  onOpenChange={(isOpen) => {
-                    setOpenProjects((prev) => ({
-                      ...prev,
-                      [project.id]: isOpen,
-                    }));
-                  }}
-                >
+                <Collapsible key={project.id} open={openProjects[project.id]}>
                   <Card className="shadow-md">
                     <CardContent className="p-4">
-                      {/* Collapsible Trigger */}
                       <CollapsibleTrigger asChild>
                         <button
                           className="w-full flex justify-between items-center text-left"
                           aria-label="Toggle Project Details"
-                          onClick={() => toggleProject(project.id)} 
+                          onClick={() => toggleProject(project.id)}
                         >
                           <div>
                             <h2 className="text-lg font-semibold">
@@ -115,22 +130,18 @@ export default function ContractorPage() {
                         </button>
                       </CollapsibleTrigger>
 
-                      {/* Collapsible Content */}
                       <CollapsibleContent className="mt-4 space-y-2">
                         <p className="text-sm text-gray-500">
-                          Due:{" "}
-                          {new Date(project.end_date).toLocaleDateString()}
+                          Due: {new Date(project.end_date).toLocaleDateString()}
                         </p>
                         <p className="text-sm text-gray-500">
-                          Status:{" "}
+                          Status: 
                           <span
                             className={`px-2 py-1 text-sm rounded-full ${
-                              project.status === "Completed"
+                              project.status === "Complete"
                                 ? "bg-green-100 text-green-800"
                                 : project.status === "In Progress"
                                 ? "bg-blue-100 text-blue-800"
-                                : project.status === "Delay"
-                                ? "bg-red-100 text-red-800"
                                 : "bg-gray-100 text-gray-800"
                             }`}
                           >
@@ -144,10 +155,7 @@ export default function ContractorPage() {
                           {tasks.length > 0 ? (
                             <div className="space-y-2">
                               {tasks.map((task) => (
-                                <div
-                                  key={task.id}
-                                  className="flex items-center gap-2"
-                                >
+                                <div key={task.id} className="flex items-center gap-2">
                                   <span className="text-sm text-gray-800">
                                     {task.name}
                                   </span>
