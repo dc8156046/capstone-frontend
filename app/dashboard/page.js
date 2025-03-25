@@ -80,7 +80,7 @@ export default function DashboardPage() {
 
         {projects.length > 0 && (
           <Link href="dashboard/project/create">
-            <button className="w-36 h-12 bg-cyan-800 text-white rounded-lg flex items-center justify-center space-x-2 hover:bg-cyan-700">
+            <button className="w-40 h-12 bg-cyan-800 text-white rounded-lg flex items-center justify-center space-x-2 hover:bg-cyan-700">
               <Plus
                 size={24}
                 className="border rounded-full bg-white text-cyan-700"
