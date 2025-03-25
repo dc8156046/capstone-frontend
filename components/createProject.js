@@ -128,6 +128,26 @@ const CreateProject = () => {
         currentTaskIds.push(taskId);
       }
 
+      const category = tasks.find((cat) => cat.id === categoryId);
+      if (!category) return prevData;
+
+      const categoryTaskIds = category.children.map((task) => task.id);
+
+      // Check if any task in the category is selected
+      const anyTaskSelected = categoryTaskIds.some((id) =>
+        currentTaskIds.includes(id)
+      );
+
+      if (anyTaskSelected) {
+        // If at least one task is selected, ensure categoryId is also selected
+        if (!currentTaskIds.includes(category.id)) {
+          currentTaskIds.push(category.id);
+        }
+      } else {
+        // If no task is selected, remove categoryId from the list
+        currentTaskIds = currentTaskIds.filter((id) => id !== category.id);
+      }
+
       return {
         ...prevData,
         task_ids: currentTaskIds,
@@ -145,7 +165,11 @@ const CreateProject = () => {
       const categoryTaskIds = category.children.map((task) => task.id);
 
       // Check if all category tasks are already selected
-      const allSelected = categoryTaskIds.every((taskId) =>
+      // const allSelected = categoryTaskIds.every((taskId) =>
+      //   currentTaskIds.includes(taskId)
+      // );
+
+      const allSelected = [category.id, ...categoryTaskIds].every((taskId) =>
         currentTaskIds.includes(taskId)
       );
 
@@ -153,12 +177,18 @@ const CreateProject = () => {
       if (allSelected) {
         // If all tasks are selected, remove them all
         updatedTaskIds = currentTaskIds.filter(
-          (id) => !categoryTaskIds.includes(id)
+          //(id) => !categoryTaskIds.includes(id)
+          (id) => ![category.id, ...categoryTaskIds].includes(id)
         );
       } else {
         // Otherwise, add all missing tasks
         updatedTaskIds = [...currentTaskIds];
-        categoryTaskIds.forEach((taskId) => {
+        // categoryTaskIds.forEach((taskId) => {
+        //   if (!updatedTaskIds.includes(taskId)) {
+        //     updatedTaskIds.push(taskId);
+        //   }
+        // });
+        [category.id, ...categoryTaskIds].forEach((taskId) => {
           if (!updatedTaskIds.includes(taskId)) {
             updatedTaskIds.push(taskId);
           }
