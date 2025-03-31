@@ -29,7 +29,7 @@ export default function ActivateAccount() {
     }, [token]);
 
     return (
-        <div>
+        <div className="flex flex-col items-center justify-center h-screen bg-cyan-800 text-white text-xl">
             {token ? "Activating your account..." : "Invalid activation link."}
         </div>
     );
