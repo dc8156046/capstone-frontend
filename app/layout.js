@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Capstone Project - BrickbyClick",
-  description: "BricksbyClick Capstone Project",
+  title: "BrickbyClick",
+  description: "BrickbyClick Capstone Project",
 };
 
 export default function RootLayout({ children }) {
