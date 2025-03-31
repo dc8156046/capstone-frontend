@@ -29,7 +29,7 @@ export default function DashboardLayout({ children }) {
       {/* Main content */}
       <div className="flex-1 flex">
         {/* Sidebar */}
-        <aside className="hidden md:flex mx-w-56 flex-shrink-0 border-r bg-background">
+        <aside className="hidden md:flex max-w-56 flex-shrink-0 border-r bg-background">
           <Sidebar />
         </aside>
 
