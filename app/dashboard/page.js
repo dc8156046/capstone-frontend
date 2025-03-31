@@ -32,7 +32,7 @@ export default function DashboardPage() {
           } else if (currentDate > endDate) {
             return { ...project, status: "Delayed" };
           } else {
-            return { ...project, status: "pending" };
+            return { ...project, status: "Pending" };
           }
         });
 
@@ -68,7 +68,7 @@ export default function DashboardPage() {
     "In Progress": projects.filter(
       (project) => project.status === "In Progress"
     ),
-    Upcoming: projects.filter((project) => project.status === "pending"),
+    Upcoming: projects.filter((project) => project.status === "Pending"),
     Complete: projects.filter((project) => project.status === "Complete"),
     Delayed: projects.filter((project) => project.status === "Delayed"),
   };
@@ -130,7 +130,7 @@ export default function DashboardPage() {
           </Card>
 
           {projects.length > 0 ? (
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-4 gap-6">
               {Object.entries(groupedProjects).map(([status, projectList]) => (
                 <div key={status} className="space-y-4">
                   <h2 className="text-xl font-semibold">{status}</h2>
@@ -144,7 +144,7 @@ export default function DashboardPage() {
                       return (
                         <li
                           key={project.id}
-                          className="p-4 bg-white shadow rounded-lg text-center"
+                          className="p-4 bg-white shadow rounded-lg text-center max-w-52"
                         >
                           <p className="text-lg font-bold">{project.name}</p>
 
@@ -180,7 +180,7 @@ export default function DashboardPage() {
 
                           <p
                             className={`text-sm text-white rounded-full mt-3 py-1 ${
-                              project.status === "pending"
+                              project.status === "Pending"
                                 ? "bg-gray-600"
                                 : project.status === "In Progress"
                                 ? "bg-cyan-600"
