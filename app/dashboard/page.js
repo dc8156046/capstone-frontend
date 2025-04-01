@@ -14,7 +14,7 @@ export default function DashboardPage() {
     const fetchProjects = async () => {
       try {
         const response = await userAPI.getAllProjects();
-        console.log("Projects:", response);
+        //console.log("Projects:", response);
 
         const updateProjects = response.map((project) => {
           const progress = calculateProgress(

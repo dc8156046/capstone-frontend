@@ -22,7 +22,7 @@ export default function ContractorPage() {
     const fetchProjects = async () => {
       try {
         const response = await userAPI.getContractorProjects();
-        console.log("Projects:", response);
+        //console.log("Projects:", response);
 
         const updatedProjects = response.map(({ project, tasks }) => ({
           project: {
