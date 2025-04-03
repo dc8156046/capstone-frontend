@@ -55,7 +55,7 @@ import {
 } from "@/components/ui/dialog";
 import { taskDetailAPI } from "@/services/taskDetail";
 
-export function TaskDetailsTable1({ projectId }) {
+export function TaskDetailsTable1({ projectId, projectData }) {
   // State
   const [tasks, setTasks] = useState([]);
   const [expandedTasks, setExpandedTasks] = useState(["1", "2"]);
@@ -95,10 +95,37 @@ export function TaskDetailsTable1({ projectId }) {
         console.log("Project data received:", projectData);
 
         if (projectData && Array.isArray(projectData.tasks)) {
+          console.log("All tasks:", projectData.tasks);
+
+          /* const availableTaskIds = new Set();
+          projectData.tasks.forEach(({ task }) => {
+            if (task && task.id) {
+              availableTaskIds.add(task.id);
+            }
+          });
+          console.log("Available tasks:", Array.from(availableTaskIds));
+
+          const missingParentIds = new Set();
+          projectData.tasks.forEach(({ task }) => {
+            if (
+              task &&
+              task.parent_id &&
+              task.parent_id !== 0 &&
+              !availableTaskIds.has(task.parent_id)
+            ) {
+              missingParentIds.add(task.parent_id);
+            }
+          });
+
+          if (missingParentIds.size > 0) {
+            console.warn("Missing parent :", Array.from(missingParentIds));
+          } */
+
           const taskMap = new Map();
           const rootTasks = [];
 
           projectData.tasks.forEach(({ task, project_task }) => {
+            console.log("Task assignee_id:", project_task?.assignee_id);
             if (!task.id || task.id <= 0) {
               console.warn(
                 `Invalid task ID ${task.id} found, skipping task:`,
@@ -106,13 +133,18 @@ export function TaskDetailsTable1({ projectId }) {
               );
               return;
             }
+            /* const isRootTask =
+              task.parent_id === 0 ||
+              task.parent_id === "0" ||
+              !availableTaskIds.has(task.parent_id);
+ */
             const formattedTask = {
               id: task.id,
               name: task.name,
-              parentId: task.parent_id,
-              level: task.parent_id === 0 ? 0 : 1,
-              assignTo: project_task.assignee_id,
-              status: project_task.status,
+              parentId: task.parent_id || 0,
+              level: 0,
+              assignTo: project_task.assignee_id || null,
+              status: project_task.status || "pending",
               dueDate: project_task.end_date
                 ? new Date(project_task.end_date)
                 : null,
@@ -125,9 +157,55 @@ export function TaskDetailsTable1({ projectId }) {
             };
             taskMap.set(task.id, formattedTask);
           });
+          console.log("Task map size:", taskMap.size);
+          console.log("Quantity for root tasks:", rootTasks.length);
 
           taskMap.forEach((task) => {
-            if (task.parentId === 0) {
+            if (task.parentId === 0 || task.parentId === "0") {
+              task.level = 0;
+              rootTasks.push(task);
+            } else {
+              const parentTask = taskMap.get(task.parentId);
+              if (parentTask) {
+                task.level = parentTask.level + 1;
+                parentTask.children.push(task);
+                console.log(
+                  ` ${task.id} has added to ${parentTask.id} as child`
+                );
+              } else {
+                console.warn(
+                  `Parent task with ID ${task.parentId} not found for task ${task.id}`
+                );
+                task.level = 0;
+                rootTasks.push(task);
+              }
+            }
+          });
+
+          /* const childTask = taskMap.get(task.id);
+            const parentTask = taskMap.get(task.parent_id);
+
+            if (childTask && parentTask) {
+              parentTask.children.push(childTask);
+              console.log(
+                ` ${childTask.id} has added to ${parentTask.id} as child`
+              );
+            } else {
+              console.warn(
+                `Parent task with ID ${task.parentId} not found for task ${task.id}`
+              );
+            }
+          }); */
+
+          if (rootTasks.length === 0) {
+            console.warn("No root task , adding all tasks as root tasks");
+            taskMap.forEach((task) => {
+              task.level = 0;
+              task.parentId = 0;
+              rootTasks.push(task);
+            });
+          }
+          /* if (task.parentId === 0) {
               rootTasks.push(task);
             } else {
               const parent = taskMap.get(task.parentId);
@@ -139,9 +217,22 @@ export function TaskDetailsTable1({ projectId }) {
                 );
               }
             }
-          });
+          }); */
 
+          const sortTasks = (taskArray) => {
+            taskArray.sort((a, b) => a.sort_order - b.sort_order);
+            taskArray.forEach((task) => {
+              if (task.children.length > 0) {
+                sortTasks(task.children);
+              }
+            });
+          };
+          sortTasks(rootTasks);
+
+          console.log("Task map size:", taskMap.size);
+          console.log("Quantity for:", rootTasks.length);
           console.log("Formatted tasks:", rootTasks);
+
           setTasks(rootTasks);
           if (rootTasks.length > 0) {
             setExpandedTasks(rootTasks.map((task) => task.id.toString()));
@@ -163,13 +254,15 @@ export function TaskDetailsTable1({ projectId }) {
         }
 
         const companyId = projectData?.project?.company_id;
+        console.log("Company ID:", companyId);
         if (companyId) {
           console.log(`Fetching users for companyId: ${companyId}`);
           const usersData = await taskDetailAPI.getUser(companyId);
+          console.log("Raw users data:", usersData);
           if (usersData && Array.isArray(usersData)) {
             const contractorsData = usersData.map((user) => ({
               id: user.id,
-              name: user.name,
+              name: user.name || user.username || user.email || "Unknown",
               email: user.email,
             }));
             console.log("Contractors data:", contractorsData);
@@ -247,51 +340,49 @@ export function TaskDetailsTable1({ projectId }) {
             ? tasks.find((t) =>
                 t.children?.some((child) => child.id === task.id)
               )?.assignTo
-            : undefined);
+            : null);
 
-        if (isEditing) {
-          return (
-            <Select
-              value={task.assignTo || ""}
-              onValueChange={(value) => {
-                handleUpdateTask(task.id, { assignTo: value });
-                setEditingCell({});
-              }}
-              onOpenChange={(open) => {
-                if (!open) {
-                  setEditingCell({});
-                }
-              }}
-            >
-              <SelectTrigger className="w-full max-w-[180px]">
-                <SelectValue placeholder="Select Contractor">
-                  {task.assignTo
-                    ? contractors.find((c) => c.id === task.assignTo)?.name
-                    : "Select Contractor"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="w-full max-w-[180px]">
-                {contractors.map((contractor) => (
-                  <SelectItem key={contractor.id} value={contractor.id}>
-                    {contractor.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          );
-        }
+        /* console.log("Assignee for task", task.id, ":", assignee);
+        console.log("Contractors:", contractors); */
 
         return (
           <div className="flex items-center gap-2">
-            <span
-              className="cursor-pointer hover:text-[#227B94]"
-              onClick={() => setEditingCell({ taskId: task.id, field })}
-            >
-              {assignee
-                ? contractors.find((c) => c.id === assignee)?.name
-                : "-"}
-            </span>
-            {assignee && (
+            {contractors.length === 0 ? (
+              <span className="text-red-500">No contractors available</span>
+            ) : (
+              <Select
+                value={assignee || ""}
+                onValueChange={(value) => {
+                  handleUpdateTask(task.id, { assignTo: value });
+                  if (isEditing) {
+                    setEditingCell({});
+                  }
+                }}
+                onOpenChange={(open) => {
+                  if (!open && isEditing) {
+                    setEditingCell({});
+                  }
+                }}
+              >
+                <SelectTrigger className="w-full max-w-[180px]">
+                  <SelectValue placeholder="Select Contractor">
+                    {assignee
+                      ? contractors.find((c) => c.id === assignee)?.name ||
+                        contractors.find((c) => c.id === assignee)?.email ||
+                        "Unknown"
+                      : "Select Contractor"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="w-full max-w-[180px]">
+                  {contractors.map((contractor) => (
+                    <SelectItem key={contractor.id} value={contractor.id}>
+                      {contractor.name || contractor.email || "Unknown"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {assignee && contractors.length > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -302,11 +393,16 @@ export function TaskDetailsTable1({ projectId }) {
                     setReminderDialog({
                       open: true,
                       contractor: {
-                        name: contractor.name,
-                        email: contractor.email,
+                        name: contractor.name || contractor.email || "Unknown",
+                        email: contractor.email || "",
                       },
-                      taskName: task.name,
+                      taskName: task.name || "Unknown Task",
                     });
+                  } else {
+                    console.error(
+                      "Contractor not found for assignee:",
+                      assignee
+                    );
                   }
                 }}
               >
@@ -437,7 +533,7 @@ export function TaskDetailsTable1({ projectId }) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="None">None</SelectItem>
-              {getAllTasks()
+              {getAllTasks
                 .filter((t) => t.id !== task.id)
                 .map((t) => (
                   <SelectItem key={t.id} value={t.id}>
@@ -482,6 +578,10 @@ export function TaskDetailsTable1({ projectId }) {
 
   //table row
   const renderTask = (task) => {
+    if (!task.id) {
+      console.error("Task with missing ID:", task);
+      return null;
+    }
     const isExpanded = expandedTasks.includes(task.id.toString());
     const hasChildren = task.children && task.children.length > 0;
 
@@ -598,24 +698,70 @@ export function TaskDetailsTable1({ projectId }) {
   const handleUpdateTask = async (taskId, updates) => {
     try {
       setTasks((prevTasks) => updateTaskLocally(prevTasks, taskId, updates));
+      const task = getAllTasks.find((t) => t.id === taskId);
+      if (!task) {
+        throw new Error("Task not found");
+      }
       const apiUpdates = {
-        assignee_id: updates.assignTo,
-        status: updates.status,
-        end_date:
-          updates.dueDate instanceof Date
-            ? updates.dueDate.toISOString().split("T")[0]
-            : updates.dueDate,
-        budget: updates.budget,
-        amount_due: updates.pay_due,
-        dependency: updates.dependence,
-        notes: updates.notes,
+        task_id: taskId,
+        name: task.name,
+        priority: "low",
+        address: "",
+        postal_code: "",
+        city_id: 0,
+        province_id: 0,
+        budget: task.budget || 0,
+        status: task.status || "pending",
+        start_date: task.dueDate
+          ? task.dueDate.toISOString()
+          : new Date().toISOString(),
+        estimated_duration: 0,
+        assignee_id: task.assignTo || 0,
+        company_id: projectData?.project?.company_id || 0,
+        note: task.notes || "",
       };
-      await taskDetailAPI.updateTask(projectId, { taskId, ...apiUpdates });
+
+      if (updates.assignTo !== undefined)
+        apiUpdates.assignee_id = updates.assignTo;
+      if (updates.status !== undefined) {
+        const validStatuses = statusOptions.map((option) => option.value);
+        if (!validStatuses.includes(updates.status)) {
+          throw new Error(`Invalid status value: ${updates.status}`);
+        }
+        apiUpdates.status = updates.status;
+      }
+      if (updates.dueDate !== undefined) {
+        apiUpdates.start_date =
+          updates.dueDate instanceof Date
+            ? updates.dueDate.toISOString()
+            : updates.dueDate;
+      }
+      if (updates.budget !== undefined) apiUpdates.budget = updates.budget;
+      if (updates.pay_due !== undefined)
+        apiUpdates.amount_due = updates.pay_due;
+      if (updates.dependence !== undefined)
+        apiUpdates.dependency = parseInt(updates.dependence, 10);
+      if (updates.notes !== undefined) apiUpdates.note = updates.notes;
+
+      console.log("Sending update request with data:", apiUpdates);
+      await taskDetailAPI.updateTask(projectId, taskId, apiUpdates);
     } catch (error) {
       console.error("Failed to update task:", error);
+      let errorMessage = "Failed to update task.";
+      if (error.response) {
+        errorMessage += ` Server responded with status ${error.response.status}.`;
+        if (error.response.status === 422) {
+          errorMessage += " Validation error.";
+          if (error.response.data?.detail) {
+            errorMessage += ` Details: ${JSON.stringify(
+              error.response.data.detail
+            )}`;
+          }
+        }
+      }
       toast({
         title: "Error",
-        description: "Failed to update task. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -651,10 +797,19 @@ export function TaskDetailsTable1({ projectId }) {
       if (!parentTask) {
         const newParentData = {
           name: parentName,
-          parentId: 0,
+          parent_id: "0",
           sort_order: tasks.length + 1,
+          status: "pending",
+          company_id: projectData?.project?.company_id || 0,
+          priority: "low",
+          estimated_duration: 0,
+          start_date: new Date().toISOString(),
         };
+        console.log("Adding new parent task with data:", newParentData);
         const response = await taskDetailAPI.addTask(projectId, newParentData);
+        if (!response || !response.id) {
+          throw new Error("Failed to create parent task: Invalid response");
+        }
         parentTask = {
           id: response.id,
           name: parentName,
@@ -662,7 +817,7 @@ export function TaskDetailsTable1({ projectId }) {
           level: 0,
           children: [],
           assignTo: null,
-          status: null,
+          status: "pending",
           dueDate: null,
           budget: null,
           pay_due: null,
@@ -700,16 +855,23 @@ export function TaskDetailsTable1({ projectId }) {
 
       const subtasksData = childrenNames.map((name, index) => ({
         name,
-        parentId: parentTaskId,
+        parent_id: parentTaskId.toString(),
         sort_order: sortOrder + index,
+        status: "pending",
+        company_id: projectData?.project?.company_id || 0,
+        priority: "low",
+        estimated_duration: 0,
+        start_date: new Date().toISOString(),
       }));
 
+      console.log("Creating subtasks with data:", subtasksData);
       const response = await taskDetailAPI.createSubtask(
         parentTaskId,
         subtasksData
       );
+      console.log("createSubtask response:", response);
 
-      if (response) {
+      /* if (response) {
         const formattedSubtasks = response.map(({ task, project_task }) => ({
           id: task.id,
           name: task.name,
@@ -725,7 +887,30 @@ export function TaskDetailsTable1({ projectId }) {
           dependence: project_task.dependency,
           notes: project_task.notes,
           children: [],
-        }));
+        })); */
+      if (response && Array.isArray(response)) {
+        const formattedSubtasks = response.map((item, index) => {
+          console.log("Processing subtask item:", item);
+          if (!item || typeof item !== "object" || !item.id) {
+            console.error("Invalid subtask item:", item);
+            return null;
+          }
+          return {
+            id: item.id,
+            name: item.name || "",
+            parentId: item.parent_id || parentTaskId,
+            level: 1,
+            assignTo: null,
+            status: "pending",
+            dueDate: null,
+            budget: null,
+            pay_due: null,
+            dependence: null,
+            notes: null,
+            children: [],
+            sort_order: item.sort_order || sortOrder + index,
+          };
+        });
 
         setTasks((prevTasks) =>
           prevTasks.map((task) =>
@@ -753,19 +938,112 @@ export function TaskDetailsTable1({ projectId }) {
           )
         );
 
+        const updatedProjectData = await taskDetailAPI.getProjectDetail(
+          projectId
+        );
+        if (updatedProjectData && Array.isArray(updatedProjectData.tasks)) {
+          const taskMap = new Map();
+          const rootTasks = [];
+
+          updatedProjectData.tasks.forEach(({ task, project_task }) => {
+            if (!task.id || task.id <= 0) {
+              console.warn(
+                `Invalid task ID ${task.id} found, skipping task:`,
+                task
+              );
+              return;
+            }
+            const formattedTask = {
+              id: task.id,
+              name: task.name,
+              parentId: task.parent_id || 0,
+              level: 0,
+              assignTo: project_task?.assignee_id || null,
+              status: project_task?.status || "pending",
+              dueDate: project_task?.end_date
+                ? new Date(project_task.end_date)
+                : null,
+              budget: project_task?.budget || null,
+              pay_due: project_task?.amount_due || null,
+              dependence: project_task?.dependency || null,
+              notes: project_task?.notes || null,
+              children: [],
+              sort_order: task.sort_order || 0,
+            };
+            taskMap.set(task.id, formattedTask);
+          });
+
+          formattedSubtasks.forEach((subtask) => {
+            if (!taskMap.has(subtask.id)) {
+              taskMap.set(subtask.id, subtask);
+            }
+          });
+
+          taskMap.forEach((task) => {
+            if (task.parentId === 0 || task.parentId === "0") {
+              task.level = 0;
+              rootTasks.push(task);
+            } else {
+              const parentTask = taskMap.get(task.parentId);
+              if (parentTask) {
+                task.level = parentTask.level + 1;
+                parentTask.children.push(task);
+              } else {
+                console.warn(
+                  `Parent task with ID ${task.parentId} not found for task ${task.id}`
+                );
+                task.level = 0;
+                rootTasks.push(task);
+              }
+            }
+          });
+
+          const sortTasks = (taskArray) => {
+            taskArray.sort((a, b) => a.sort_order - b.sort_order);
+            taskArray.forEach((task) => {
+              if (task.children.length > 0) {
+                sortTasks(task.children);
+              }
+            });
+          };
+          sortTasks(rootTasks);
+
+          setTasks(rootTasks);
+          setExpandedTasks(rootTasks.map((task) => task.id.toString()));
+        } else {
+          throw new Error("Failed to fetch updated project data");
+        }
+
         if (!expandedTasks.includes(parentTaskId.toString())) {
           setExpandedTasks((prev) => [...prev, parentTaskId.toString()]);
         }
 
         toast({ title: "Success", description: "Subtasks added successfully" });
         return true;
+      } else {
+        throw new Error("Invalid response from createSubtask");
       }
-      return false;
     } catch (error) {
       console.error("Failed to add task:", error);
+      let errorMessage = "Failed to add task.";
+      if (error.response) {
+        errorMessage += ` Server responded with status ${error.response.status}.`;
+        if (error.response.status === 422) {
+          errorMessage += " Validation error.";
+          if (error.response.data?.detail) {
+            console.log(
+              "Validation error details:",
+              error.response.data.detail
+            );
+            errorMessage += ` Details: ${JSON.stringify(
+              error.response.data.detail
+            )}`;
+          }
+        }
+      }
       toast({
         title: "Error",
-        description: error.message || "Failed to add task",
+        description: errorMessage,
         variant: "destructive",
       });
       return false;
@@ -850,19 +1128,42 @@ export function TaskDetailsTable1({ projectId }) {
 
   // Get task name by id
   const getTaskNameById = (taskId) =>
-    getAllTasks().find((t) => t.id === taskId)?.name || "Unknown";
+    getAllTasks.find((t) => t.id === taskId)?.name || "Unknown";
 
   // Add notes to a task
   const handleAddNotes = async (taskId, notes) => {
     try {
+      console.log("Tasks state before adding notes:", tasks);
+      console.log("Looking for taskId:", taskId);
+      const taskExists = tasks.some(
+        (task) =>
+          task.id === taskId ||
+          (task.children && task.children.some((child) => child.id === taskId))
+      );
+      if (!taskExists) {
+        throw new Error("Task not found in current state");
+      }
+
       await handleUpdateTask(taskId, { notes });
       setNotesInput((prev) => {
         const updated = { ...prev };
         delete updated[taskId];
         return updated;
       });
+      toast({
+        title: "Success",
+        description: "Notes added successfully",
+      });
     } catch (error) {
       console.error("Failed to add notes:", error);
+      toast({
+        title: "Error",
+        description:
+          error.message === "Task not found in current state"
+            ? "Task has been deleted. Cannot add notes."
+            : "Failed to add notes.",
+        variant: "destructive",
+      });
     }
   };
 

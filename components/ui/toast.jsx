@@ -4,6 +4,7 @@ import * as React from "react";
 import * as ToastPrimitives from "@radix-ui/react-toast";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createPortal } from "react-dom";
 
 const ToastProvider = ({ children }) => (
   <ToastPrimitives.Provider>{children}</ToastPrimitives.Provider>
@@ -11,6 +12,7 @@ const ToastProvider = ({ children }) => (
 
 const ToastViewport = () => {
   const [mounted, setMounted] = React.useState(false);
+  const [viewportRef, setViewportRef] = React.useState(null);
 
   React.useEffect(() => {
     setMounted(true);
@@ -18,12 +20,19 @@ const ToastViewport = () => {
 
   if (!mounted) return null;
 
-  return (
+  // 自定义挂载点为 document.body
+  const mountNode = typeof document !== "undefined" ? document.body : null;
+
+  if (!mountNode) return null;
+
+  return createPortal(
     <ToastPrimitives.Viewport
+      ref={setViewportRef}
       className={cn(
         "fixed bottom-4 right-4 z-[100] flex flex-col gap-4 max-w-[400px] w-full sm:w-auto"
       )}
-    />
+    />,
+    mountNode
   );
 };
 

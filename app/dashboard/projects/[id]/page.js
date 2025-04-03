@@ -119,7 +119,7 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Task Details Table */}
-      <TaskDetailsTable1 projectId={projectId} />
+      <TaskDetailsTable1 projectId={projectId} projectData={projectData} />
     </div>
   );
 }
