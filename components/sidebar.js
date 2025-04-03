@@ -46,7 +46,7 @@ const sidebarNavItems = [
 
       {
         title: "Project Detail",
-        href: "/dashboard/project/6",
+        href: "/dashboard/project/13",
       },
     ],
   },

@@ -5,6 +5,8 @@ import axios from "axios";
 export const taskDetailAPI = {
   getUser: (companyId) => apiService.post(`/users/all`, { companyId }),
   getProjectDetail: (id) => apiService.post(`/projects/${id}`),
+  updateProject: (id, data) => apiService.put(`/projects/${id}`, data),
+  deleteProject: (id) => apiService.delete(`/projects/${id}`),
   addTask: (id, data) => apiService.post(`/projects/${id}/tasks`, data),
   updateTask: (id, taskId, data) =>
     apiService.put(`/projects/${id}/tasks`, { taskId, ...data }),
