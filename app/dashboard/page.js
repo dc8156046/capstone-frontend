@@ -16,6 +16,8 @@ export default function DashboardPage() {
         const response = await userAPI.getAllProjects();
         //console.log("Projects:", response);
 
+
+        // Fecth from API and add a filter to each collumn rather than using the if's
         const updateProjects = response.map((project) => {
           const progress = calculateProgress(
             project.start_date,
@@ -25,14 +27,14 @@ export default function DashboardPage() {
           const endDate = new Date(project.end_date);
           const currentDate = new Date();
 
-          if (progress === 100 && project.status !== "complete") {
-            return { ...project, status: "Complete" };
+          if (project.status == "completed") {
+            return { ...project, status: "completed" };
           } else if (startDate && currentDate <= endDate) {
-            return { ...project, status: "In Progress" };
-          } else if (currentDate > endDate) {
-            return { ...project, status: "Delayed" };
+            return { ...project, status: "in_progress" };
+          } else if (project.status !== "completed") {
+            return { ...project, status: "delayed" };
           } else {
-            return { ...project, status: "Pending" };
+            return { ...project, status: "pending" };
           }
         });
 
@@ -66,11 +68,11 @@ export default function DashboardPage() {
 
   const groupedProjects = {
     "In Progress": projects.filter(
-      (project) => project.status === "In Progress"
+      (project) => project.status === "in_progress"
     ),
-    Upcoming: projects.filter((project) => project.status === "Pending"),
-    Complete: projects.filter((project) => project.status === "Complete"),
-    Delayed: projects.filter((project) => project.status === "Delayed"),
+    Upcoming: projects.filter((project) => project.status === "pending"),
+    Complete: projects.filter((project) => project.status === "completed"),
+    Delayed: projects.filter((project) => project.status === "delayed"),
   };
 
   return (
@@ -152,7 +154,7 @@ export default function DashboardPage() {
                             <div className="w-full bg-gray-200 rounded-full h-5 mt-2 relative">
                               <div
                                 className={`h-5 rounded-full text-xs text-white flex items-center justify-center ${
-                                  project.status === "Delayed"
+                                  project.status === "delayed"
                                     ? "bg-red-600"
                                     : progress === 100
                                     ? "bg-green-600"
@@ -180,13 +182,13 @@ export default function DashboardPage() {
 
                           <p
                             className={`text-sm text-white rounded-full mt-3 py-1 ${
-                              project.status === "Pending"
+                              project.status === "pending"
                                 ? "bg-gray-600"
-                                : project.status === "In Progress"
+                                : project.status === "in_progress"
                                 ? "bg-cyan-600"
-                                : project.status === "Complete"
+                                : project.status === "completed"
                                 ? "bg-green-600"
-                                : project.status === "Delayed"
+                                : project.status === "delayed"
                                 ? "bg-red-600"
                                 : ""
                             }`}
