@@ -44,6 +44,9 @@ export default function VerifyCode() {
     }
   };
 
+  //console.log(email);
+
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-cyan-900">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
@@ -74,7 +77,6 @@ export default function VerifyCode() {
           <button type="submit" className="text-blue-500 hover:underline" onSubmit={handleResendEmail}>
             Resend email
           </button>
-          {/* call forget pass api method again ! */}
         </p>
       </div>
     </div>
