@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Settings, User, Lock, LogOut, Mail, UserCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export function UserNav() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export function UserNav() {
   const [email, setEmail] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  
+
   useEffect(() => {
     try {
       const storedUsername = localStorage.getItem("username");
@@ -66,8 +67,8 @@ export function UserNav() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
-              <AvatarImage src="/avatars/01.png" alt="User Avatar" />
-              <AvatarFallback>User</AvatarFallback>
+              <AvatarImage src="/user-avatar.jpg" alt="User Avatar" />
+              <AvatarFallback className="text-2xl"></AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
@@ -82,7 +83,7 @@ export function UserNav() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={openPersonalInfo}
               onSelect={(e) => {
                 // Prevent default selection behavior
@@ -91,14 +92,6 @@ export function UserNav() {
             >
               <User className="mr-2 h-4 w-4" />
               <span>Personal Information</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Lock className="mr-2 h-4 w-4" />
-              <span>Change Password</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
@@ -109,8 +102,8 @@ export function UserNav() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog 
-        open={dialogOpen} 
+      <Dialog
+        open={dialogOpen}
         onOpenChange={(open) => {
           setDialogOpen(open);
         }}
@@ -118,41 +111,39 @@ export function UserNav() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Personal Information</DialogTitle>
-            <DialogDescription>
-              Your account details
-            </DialogDescription>
+            <DialogDescription>Your account details</DialogDescription>
           </DialogHeader>
-          
+
           <div className="flex justify-center py-6">
             <Avatar className="h-24 w-24">
-              <AvatarImage src="/avatars/01.png" alt="User Avatar" />
-              <AvatarFallback className="text-2xl">
-                <UserCircle className="h-20 w-20" />
-              </AvatarFallback>
+              <AvatarImage src="/user-avatar.jpg" alt="User Avatar" />
+              <AvatarFallback className="text-2xl"></AvatarFallback>
             </Avatar>
           </div>
-          
+
           <div className="space-y-6">
             <div>
-              <h3 className="mb-2 text-sm font-medium text-muted-foreground">Username</h3>
+              <h3 className="mb-2 text-sm font-medium text-muted-foreground">
+                Username
+              </h3>
               <p className="text-lg">{username || "Not available"}</p>
             </div>
-            
+
             <div className="border-t border-border my-4"></div>
-            
+
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                <h3 className="text-sm font-medium text-muted-foreground">Email Address</h3>
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  Email Address
+                </h3>
               </div>
               <p className="text-lg">{email || "Not available"}</p>
             </div>
           </div>
-          
+
           <DialogFooter className="mt-6">
-            <Button onClick={() => setDialogOpen(false)}>
-              Close
-            </Button>
+            <Button onClick={() => setDialogOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

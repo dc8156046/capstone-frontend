@@ -13,13 +13,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { 
-  Pencil, 
-  Trash2, 
-  UserPlus, 
-  AlertCircle,
-  Loader2
-} from "lucide-react";
+import { Pencil, Trash2, UserPlus, AlertCircle, Loader2 } from "lucide-react";
 import { userAPI } from "@/services";
 import {
   AlertDialog,
@@ -34,41 +28,15 @@ import {
 
 export default function UserList() {
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [userIdToDelete, setUserIdToDelete] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    password: "",
-    role: "user",
-  });
 
   const fetchUsers = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await userAPI.getUsers();
+    const response = await userAPI.getUsers();
+    if (response) {
       if (Array.isArray(response)) {
         setUsers(response);
       } else {
-        console.warn("API did not return an array for users:", response);
         setUsers([]);
       }
-    } catch (err) {
-      console.error("Error fetching users:", err);
-      setError("An error occurred while fetching users. Please try again later.");
-      setUsers([]);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -76,61 +44,85 @@ export default function UserList() {
     fetchUsers();
   }, []);
 
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    password: "",
+  });
+
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+    console.log(name, value);
   };
 
-  const resetFormData = () => {
+  // Add new user
+  const handleAddUser = async (e) => {
+    e.preventDefault();
+    formData.first_name = firstname;
+    formData.last_name = lastname;
+    formData.email = email;
+    formData.password = password;
+    const response = await userAPI.addUser(formData);
+    if (response) {
+      setUsers((prev) => [...prev, response]);
+    }
+    setIsAddDialogOpen(false);
     setFormData({
       first_name: "",
       last_name: "",
       email: "",
       password: "",
-      role: "user",
     });
   };
 
-  const handleAddUser = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    
-    try {
-      const response = await userAPI.addUser(formData);
-      setUsers((prev) => [...prev, response]);
-      setIsAddDialogOpen(false);
-      resetFormData();
-    } catch (err) {
-      console.error("Error adding user:", err);
-      alert(`Failed to add user: ${err.data?.detail || err.statusText || "Unknown error"}`);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  // const handleAddUser = async (e) => {
+  //   e.preventDefault();
+  //   setSubmitting(true);
+
+  //   try {
+  //     const response = await userAPI.addUser(formData);
+  //     setUsers((prev) => [...prev, response]);
+  //     setIsAddDialogOpen(false);
+  //     resetFormData();
+  //   } catch (err) {
+  //     console.error("Error adding user:", err);
+  //     alert(
+  //       `Failed to add user: ${
+  //         err.data?.detail || err.statusText || "Unknown error"
+  //       }`
+  //     );
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
 
   const handleUpdateUser = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
-    
-    try {
-      const dataToSend = {...formData};
-      if (!dataToSend.password) {
-        delete dataToSend.password;
-      }
-      
-      const data = await userAPI.updateUser(currentUser.id, dataToSend);
-      setUsers(users.map((user) => user.id === data.id ? data : user));
-      setIsEditDialogOpen(false);
-    } catch (err) {
-      console.error("Error updating user:", err);
-      alert(`Failed to update user: ${err.data?.detail || err.statusText || "Unknown error"}`);
-    } finally {
-      setSubmitting(false);
-      setCurrentUser(null);
+    console.log(formData);
+    const data = await userAPI.updateUser(currentUser.id, formData);
+    if (data) {
+      const updatedUsers = users.map((user) =>
+        user.id === data.id ? data : user
+      );
+      setUsers(updatedUsers);
     }
+
+    setIsEditDialogOpen(false);
+    setCurrentUser(null);
   };
 
   const confirmDeleteUser = (userId) => {
@@ -140,14 +132,18 @@ export default function UserList() {
 
   const handleDeleteUser = async () => {
     setSubmitting(true);
-    
+
     try {
       await userAPI.deleteUser(userIdToDelete);
       setUsers(users.filter((user) => user.id !== userIdToDelete));
       setIsDeleteDialogOpen(false);
     } catch (err) {
       console.error("Error deleting user:", err);
-      alert(`Failed to delete user: ${err.data?.detail || err.statusText || "Unknown error"}`);
+      alert(
+        `Failed to delete user: ${
+          err.data?.detail || err.statusText || "Unknown error"
+        }`
+      );
     } finally {
       setSubmitting(false);
       setUserIdToDelete(null);
@@ -161,7 +157,6 @@ export default function UserList() {
       last_name: user.last_name,
       email: user.email,
       password: "",
-      role: user.role || "user",
     });
     setIsEditDialogOpen(true);
   };
@@ -227,32 +222,9 @@ export default function UserList() {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <select
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Adding...
-                  </>
-                ) : (
-                  'Add User'
-                )}
+
+              <Button type="submit" className="w-full">
+                Add User
               </Button>
             </form>
           </DialogContent>
@@ -263,7 +235,8 @@ export default function UserList() {
             <DialogHeader>
               <DialogTitle>Edit User</DialogTitle>
               <DialogDescription>
-                Update user information. Leave password blank to keep the current password.
+                Update user information. Leave password blank to keep the
+                current password.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleUpdateUser} className="space-y-4">
@@ -310,32 +283,9 @@ export default function UserList() {
                   onChange={handleInputChange}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-role">Role</Label>
-                <select
-                  id="edit-role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  'Update User'
-                )}
+
+              <Button type="submit" className="w-full">
+                Update User
               </Button>
             </form>
           </DialogContent>
@@ -349,7 +299,7 @@ export default function UserList() {
             <p>{error}</p>
           </div>
         )}
-        
+
         {loading ? (
           <div className="flex justify-center items-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -361,17 +311,26 @@ export default function UserList() {
               <table className="w-full">
                 <thead className="border-b bg-muted/50">
                   <tr>
-                    <th className="py-3 px-4 text-left font-medium">First Name</th>
-                    <th className="py-3 px-4 text-left font-medium">Last Name</th>
+                    <th className="py-3 px-4 text-left font-medium">
+                      First Name
+                    </th>
+                    <th className="py-3 px-4 text-left font-medium">
+                      Last Name
+                    </th>
                     <th className="py-3 px-4 text-left font-medium">Email</th>
                     <th className="py-3 px-4 text-left font-medium">Role</th>
-                    <th className="py-3 px-4 text-right font-medium">Actions</th>
+                    <th className="py-3 px-4 text-right font-medium">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="py-8 px-4 text-center text-muted-foreground">
+                      <td
+                        colSpan="5"
+                        className="py-8 px-4 text-center text-muted-foreground"
+                      >
                         No users found
                       </td>
                     </tr>
@@ -381,7 +340,9 @@ export default function UserList() {
                         <td className="py-3 px-4">{user.first_name}</td>
                         <td className="py-3 px-4">{user.last_name}</td>
                         <td className="py-3 px-4">{user.email}</td>
-                        <td className="py-3 px-4 capitalize">{user.role || "user"}</td>
+                        <td className="py-3 px-4 capitalize">
+                          {user.role || "user"}
+                        </td>
                         <td className="py-3 px-4 text-right">
                           <Button
                             variant="ghost"
@@ -410,12 +371,16 @@ export default function UserList() {
         )}
       </CardContent>
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm User Deletion</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this user? This action cannot be undone.
+              Are you sure you want to delete this user? This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -431,7 +396,7 @@ export default function UserList() {
                   Deleting...
                 </>
               ) : (
-                'Delete'
+                "Delete"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
