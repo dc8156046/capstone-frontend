@@ -14,33 +14,20 @@ export default function DashboardPage() {
     const fetchProjects = async () => {
       try {
         const response = await userAPI.getAllProjects();
-        //console.log("Projects:", response);
 
-
-        // Fecth from API and add a filter to each collumn rather than using the if's
-        const updateProjects = response.map((project) => {
+        const updatedProjects = response.map((project) => {
           const progress = calculateProgress(
-            project.start_date,
-            project.end_date
+            new Date(project.start_date),
+            new Date(project.end_date),
+            new Date()
           );
-          const startDate = new Date(project.start_date);
-          const endDate = new Date(project.end_date);
-          const currentDate = new Date();
 
-          if (project.status == "completed") {
-            return { ...project, status: "completed" };
-          } else if (startDate && currentDate <= endDate) {
-            return { ...project, status: "in_progress" };
-          } else if (project.status !== "completed") {
-            return { ...project, status: "delayed" };
-          } else {
-            return { ...project, status: "pending" };
-          }
+          return { ...project, progress };
         });
 
-        setProjects(updateProjects);
+        setProjects(updatedProjects);
       } catch (error) {
-        console.error(error);
+        console.error("Error fetching projects:", error);
       } finally {
         setLoading(false);
       }
@@ -49,27 +36,17 @@ export default function DashboardPage() {
     fetchProjects();
   }, []);
 
-  const calculateProgress = (start_date, end_date) => {
-    if (!start_date || !end_date) return 0;
+  const calculateProgress = (startDate, endDate, currentDate) => {
+    if (!startDate || !endDate) return 0;
 
-    const startDate = new Date(start_date);
-    const endDate = new Date(end_date);
-    const currentDate = new Date();
+    const totalDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
+    const elapsedDays = (currentDate - startDate) / (1000 * 60 * 60 * 24);
 
-    if (currentDate < startDate) return 0;
-    if (currentDate > endDate) return 100;
-
-    const totalDays = endDate - startDate;
-    const elapsedDays = currentDate - startDate;
-    const progress = (elapsedDays / totalDays) * 100;
-
-    return Math.round(progress);
+    return Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100)));
   };
 
   const groupedProjects = {
-    "In Progress": projects.filter(
-      (project) => project.status === "in_progress"
-    ),
+    "In Progress": projects.filter((project) => project.status === "in_progress"),
     Upcoming: projects.filter((project) => project.status === "pending"),
     Complete: projects.filter((project) => project.status === "completed"),
     Delayed: projects.filter((project) => project.status === "delayed"),
@@ -83,10 +60,7 @@ export default function DashboardPage() {
         {projects.length > 0 && (
           <Link href="dashboard/project/create">
             <button className="w-40 h-12 bg-cyan-800 text-white rounded-lg flex items-center justify-center space-x-2 hover:bg-cyan-700">
-              <Plus
-                size={24}
-                className="border rounded-full bg-white text-cyan-700"
-              />
+              <Plus size={24} className="border rounded-full bg-white text-cyan-700" />
               <span className="text-lg font-semibold">Add Project</span>
             </button>
           </Link>
@@ -95,33 +69,29 @@ export default function DashboardPage() {
 
       {loading ? (
         <div className="flex justify-center items-center">
-          <span className="text-lg font-semibold text-gray-700">
-            Loading Projects...
-          </span>
+          <span className="text-lg font-semibold text-gray-700">Loading Projects...</span>
         </div>
       ) : (
         <>
           <Card>
             <CardContent className="p-6 space-y-4">
               <h2 className="text-xl font-semibold">Project Overview</h2>
-              <div className="grid grid-cols-4 gap-4 text-center">
-                <div className="p-4 bg-gray-100 rounded-xl text-black">
-                  <p className="text-lg font-bold">
-                    {groupedProjects["In Progress"].length}
-                  </p>
-                  <p className="text-sm font-semibold">In Progress</p>
-                </div>
-                <div className="p-4 bg-gray-100 rounded-xl text-black">
-                  <p className="text-lg font-bold">
-                    {groupedProjects["Upcoming"].length}
-                  </p>
+              <div className="grid grid-cols-5 gap-5 text-center">
+              <div className="p-4 bg-gray-100 rounded-xl text-black">
+                  <p className="text-lg font-bold">{groupedProjects["Upcoming"].length}</p>
                   <p className="text-sm font-semibold">Upcoming</p>
                 </div>
                 <div className="p-4 bg-gray-100 rounded-xl text-black">
-                  <p className="text-lg font-bold">
-                    {groupedProjects["Complete"].length}
-                  </p>
+                  <p className="text-lg font-bold">{groupedProjects["In Progress"].length}</p>
+                  <p className="text-sm font-semibold">In Progress</p>
+                </div>
+                <div className="p-4 bg-gray-100 rounded-xl text-black">
+                  <p className="text-lg font-bold">{groupedProjects["Complete"].length}</p>
                   <p className="text-sm font-semibold">Complete</p>
+                </div>
+                <div className="p-4 bg-gray-100 rounded-xl text-black">
+                  <p className="text-lg font-bold">{groupedProjects["Delayed"].length}</p>
+                  <p className="text-sm font-semibold">Delayed</p>
                 </div>
                 <div className="p-4 bg-gray-100 rounded-xl text-black">
                   <p className="text-lg font-bold">{projects.length}</p>
@@ -137,67 +107,52 @@ export default function DashboardPage() {
                 <div key={status} className="space-y-4">
                   <h2 className="text-xl font-semibold">{status}</h2>
                   <ul className="space-y-2">
-                    {projectList.map((project) => {
-                      const progress = calculateProgress(
-                        project.start_date,
-                        project.end_date
-                      );
+                    {projectList.map((project) => (
+                      <li key={project.id} className="p-4 bg-white shadow rounded-lg text-center max-w-52">
+                        <p className="text-lg font-bold">{project.name}</p>
 
-                      return (
-                        <li
-                          key={project.id}
-                          className="p-4 bg-white shadow rounded-lg text-center max-w-52"
-                        >
-                          <p className="text-lg font-bold">{project.name}</p>
-
-                          {project.status !== "pending" && (
-                            <div className="w-full bg-gray-200 rounded-full h-5 mt-2 relative">
-                              <div
-                                className={`h-5 rounded-full text-xs text-white flex items-center justify-center ${
-                                  project.status === "delayed"
-                                    ? "bg-red-600"
-                                    : progress === 100
-                                    ? "bg-green-600"
-                                    : "bg-cyan-600"
-                                }`}
-                                style={{ width: `${progress}%` }}
-                              >
-                                <span className="absolute w-full text-center text-xs font-semibold text-white">
-                                  {progress}%
-                                </span>
-                              </div>
+                        {project.status !== "pending" && (
+                          <div className="w-full bg-gray-200 rounded-full h-5 mt-2 relative">
+                            <div
+                              className={`h-5 rounded-full text-xs text-white flex items-center justify-center ${
+                                project.status === "delayed"
+                                  ? "bg-red-600"
+                                  : project.progress === 100
+                                  ? "bg-green-600"
+                                  : "bg-cyan-600"
+                              }`}
+                              style={{ width: `${project.progress}%` }}
+                            >
+                              <span className="absolute w-full text-center text-xs font-semibold text-white">
+                                {project.progress}%
+                              </span>
                             </div>
-                          )}
+                          </div>
+                        )}
 
-                          <p className="text-sm mt-2">{project.address}</p>
-                          <p className="text-sm mt-2">
-                            {project.start_date
-                              ? project.start_date.split("T")[0]
-                              : ""}{" "}
-                            -{" "}
-                            {project.end_date
-                              ? project.end_date.split("T")[0]
-                              : ""}
-                          </p>
+                        <p className="text-sm mt-2">{project.address}</p>
+                        <p className="text-sm mt-2">
+                          {project.start_date ? project.start_date.split("T")[0] : ""} -{" "}
+                          {project.end_date ? project.end_date.split("T")[0] : ""}
+                        </p>
 
-                          <p
-                            className={`text-sm text-white rounded-full mt-3 py-1 ${
-                              project.status === "pending"
-                                ? "bg-gray-600"
-                                : project.status === "in_progress"
-                                ? "bg-cyan-600"
-                                : project.status === "completed"
-                                ? "bg-green-600"
-                                : project.status === "delayed"
-                                ? "bg-red-600"
-                                : ""
-                            }`}
-                          >
-                            {project.status}
-                          </p>
-                        </li>
-                      );
-                    })}
+                        <p
+                          className={`text-sm text-white rounded-full mt-3 py-1 ${
+                            project.status === "pending"
+                              ? "bg-gray-600"
+                              : project.status === "in_progress"
+                              ? "bg-cyan-600"
+                              : project.status === "completed"
+                              ? "bg-green-600"
+                              : project.status === "delayed"
+                              ? "bg-red-600"
+                              : ""
+                          }`}
+                        >
+                          {project.status}
+                        </p>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               ))}
