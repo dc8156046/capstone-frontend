@@ -153,25 +153,53 @@ const ProjectDetail = () => {
     fetchProjectData();
   }, [projectId, router]);
 
-  // Transform tasks from API format to Gantt chart format
-  const transformTasksForGantt = (projectTasks) => {
-    if (!projectTasks || projectTasks.length === 0) {
-      return [];
+// Transform tasks from API format to Gantt chart format
+const transformTasksForGantt = (projectTasks) => {
+  if (!projectTasks || projectTasks.length === 0) {
+    return [];
+  }
+
+  // Create a map to organize tasks by parent
+  const tasksByParent = {};
+  const parentTasks = {};
+
+  // First pass: categorize tasks by their parent ID
+  projectTasks.forEach((taskData) => {
+    const { task, project_task } = taskData;
+    const parentId = task.parent_id || 'root';
+    
+    if (!tasksByParent[parentId]) {
+      tasksByParent[parentId] = [];
     }
+    
+    tasksByParent[parentId].push({ task, project_task });
+    
+    // Also track parent tasks for quick access
+    if (!task.parent_id) {
+      parentTasks[task.id] = {
+        task,
+        project_task
+      };
+    }
+  });
 
-    const parentTasks = {};
-    const childTasks = [];
-
-    // First pass: identify parent tasks and create them
-    projectTasks.forEach((taskData) => {
+  // Build gantt tasks in the correct hierarchical order
+  const ganttTasks = [];
+  
+  // Helper function to add tasks in the correct order
+  const addTasksInOrder = (parentId = 'root', indent = 0) => {
+    const tasks = tasksByParent[parentId] || [];
+    
+    for (const taskData of tasks) {
       const { task, project_task } = taskData;
-
+      
+      // Create a Gantt task object
+      const startDate = new Date(project_task.start_date || new Date());
+      const endDate = new Date(project_task.end_date || new Date());
+      
       if (!task.parent_id) {
         // This is a parent task
-        const startDate = new Date(project_task.start_date || new Date());
-        const endDate = new Date(project_task.end_date || new Date());
-
-        parentTasks[task.id] = {
+        const ganttTask = {
           id: `Task-${task.id}`,
           name: task.name,
           start: startDate,
@@ -185,53 +213,54 @@ const ProjectDetail = () => {
           amount_due: project_task.amount_due || 0,
           assignee_id: project_task.assignee_id,
           styles: {
-            backgroundColor:
-              statusColors[project_task.status || TaskStatus.PENDING],
+            backgroundColor: statusColors[project_task.status || TaskStatus.PENDING],
             backgroundSelectedColor: "#227B94",
             progressColor: "#227B94",
             progressSelectedColor: "#227B94",
           },
           isDisabled: true,
         };
+        
+        ganttTasks.push(ganttTask);
       } else {
-        // This is a child task - store it to process after all parents are created
-        childTasks.push({ task, project_task });
+        // This is a child task
+        const parentTaskId = `Task-${task.parent_id}`;
+        
+        const ganttTask = {
+          id: `SubTask-${task.id}`,
+          name: task.name,
+          start: startDate,
+          end: endDate,
+          type: "task",
+          progress: 0,
+          project: parentTaskId,
+          dependencies: [parentTaskId],
+          project_id: projectData.id,
+          status: project_task.status || TaskStatus.PENDING,
+          budget: project_task.budget || 0,
+          amount_due: project_task.amount_due || 0,
+          assignee_id: project_task.assignee_id,
+          styles: {
+            backgroundColor: statusColors[project_task.status || TaskStatus.PENDING],
+          },
+          isDisabled: true,
+        };
+        
+        ganttTasks.push(ganttTask);
       }
-    });
-
-    // Second pass: create child tasks and link to parents
-    const ganttTasks = Object.values(parentTasks);
-
-    childTasks.forEach(({ task, project_task }) => {
-      const parentTaskId = `Task-${task.parent_id}`;
-
-      const startDate = new Date(project_task.start_date || new Date());
-      const endDate = new Date(project_task.end_date || new Date());
-
-      ganttTasks.push({
-        id: `SubTask-${task.id}`,
-        name: task.name,
-        start: startDate,
-        end: endDate,
-        type: "task",
-        progress: 0,
-        project: parentTaskId,
-        dependencies: [parentTaskId],
-        project_id: projectData.id,
-        status: project_task.status || TaskStatus.PENDING,
-        budget: project_task.budget || 0,
-        amount_due: project_task.amount_due || 0,
-        assignee_id: project_task.assignee_id,
-        styles: {
-          backgroundColor:
-            statusColors[project_task.status || TaskStatus.PENDING],
-        },
-        isDisabled: true,
-      });
-    });
-
-    return ganttTasks;
+      
+      // Recursively add child tasks immediately after their parent
+      if (tasksByParent[task.id]) {
+        addTasksInOrder(task.id, indent + 1);
+      }
+    }
   };
+  
+  // Start the recursive process
+  addTasksInOrder();
+  
+  return ganttTasks;
+};
 
   const handleExpanderClick = (task) => {
     setTasks(
