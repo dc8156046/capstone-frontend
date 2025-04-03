@@ -89,26 +89,26 @@ export default function UserList() {
     });
   };
 
-  const handleAddUser = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
+  // const handleAddUser = async (e) => {
+  //   e.preventDefault();
+  //   setSubmitting(true);
 
-    try {
-      const response = await userAPI.addUser(formData);
-      setUsers((prev) => [...prev, response]);
-      setIsAddDialogOpen(false);
-      resetFormData();
-    } catch (err) {
-      console.error("Error adding user:", err);
-      alert(
-        `Failed to add user: ${
-          err.data?.detail || err.statusText || "Unknown error"
-        }`
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  //   try {
+  //     const response = await userAPI.addUser(formData);
+  //     setUsers((prev) => [...prev, response]);
+  //     setIsAddDialogOpen(false);
+  //     resetFormData();
+  //   } catch (err) {
+  //     console.error("Error adding user:", err);
+  //     alert(
+  //       `Failed to add user: ${
+  //         err.data?.detail || err.statusText || "Unknown error"
+  //       }`
+  //     );
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
 
   const handleUpdateUser = async (e) => {
     e.preventDefault();
