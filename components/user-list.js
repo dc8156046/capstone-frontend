@@ -41,7 +41,6 @@ export default function UserList() {
     last_name: "",
     email: "",
     password: "",
-    role: "user",
   });
 
   const [firstname, setFirstname] = useState("");
@@ -56,6 +55,7 @@ export default function UserList() {
       ...prev,
       [name]: value,
     }));
+    console.log(name, value);
   };
 
   // Add new user
@@ -75,14 +75,13 @@ export default function UserList() {
       last_name: "",
       email: "",
       password: "",
-      role: "user",
     });
   };
 
   // Update user
   const handleUpdateUser = async (e) => {
     e.preventDefault();
-
+    console.log(formData);
     const data = await userAPI.updateUser(currentUser.id, formData);
     if (data) {
       const updatedUsers = users.map((user) =>
@@ -114,7 +113,6 @@ export default function UserList() {
       last_name: user.last_name,
       email: user.email,
       password: "",
-      role: user.role,
     });
     setIsEditDialogOpen(true);
   };
@@ -177,21 +175,7 @@ export default function UserList() {
                   required
                 />
               </div>
-              {/*
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <select
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              */}
+
               <Button type="submit" className="w-full">
                 Add User
               </Button>
@@ -248,21 +232,7 @@ export default function UserList() {
                   onChange={handleInputChange}
                 />
               </div>
-              {/*
-              <div className="space-y-2">
-                <Label htmlFor="edit-role">Role</Label>
-                <select
-                  id="edit-role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              */}
+
               <Button type="submit" className="w-full">
                 Update User
               </Button>
