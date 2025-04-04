@@ -64,6 +64,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
     open: false,
     contractor: null,
     taskName: "",
+    taskId: null,
   });
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
@@ -385,10 +386,12 @@ export function TaskDetailsTable1({ projectId, projectData }) {
                     setReminderDialog({
                       open: true,
                       contractor: {
+                        id: contractor.id,
                         name: contractor.name || contractor.email || "Unknown",
                         email: contractor.email || "",
                       },
                       taskName: task.name || "Unknown Task",
+                      taskId: task.id,
                     });
                   } else {
                     console.error(
@@ -1278,19 +1281,13 @@ export function TaskDetailsTable1({ projectId, projectData }) {
             open,
             contractor: open ? reminderDialog.contractor : null,
             taskName: open ? reminderDialog.taskName : "",
+            taskId: open ? reminderDialog.taskId : null,
           });
         }}
         contractor={reminderDialog.contractor}
         taskName={reminderDialog.taskName || ""}
-        projectName="Project XXX"
-        onSend={() => {
-          if (reminderDialog.contractor) {
-            handleSendReminder(
-              reminderDialog.contractor,
-              reminderDialog.taskName
-            );
-          }
-        }}
+        taskId={reminderDialog.taskId}
+        projectId={projectId}
       />
 
       <DeleteDialog
