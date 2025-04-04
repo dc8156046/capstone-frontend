@@ -20,8 +20,8 @@ export default function ReminderDialog({
   onOpenChange,
   contractor,
   taskName,
+  taskId,
   projectId,
-  onSend,
 }) {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -33,20 +33,22 @@ export default function ReminderDialog({
     company: "",
   });
   const { toast } = useToast();
-
+  console.log("projectId", projectId);
   // 获取项目详情
   useEffect(() => {
     if (open && projectId) {
       const fetchProjectDetails = async () => {
         try {
           const details = await taskDetailAPI.getProjectDetail(projectId);
+          const project = details.project;
+          console.log("Project details:", project);
           setProjectDetails({
-            name: details.name || "",
-            start_date: details.start_date
+            name: project.name || "",
+            start_date: project.start_date
               ? new Date(details.start_date).toLocaleDateString()
               : "",
-            address: details.address || "",
-            company: details.company || "",
+            address: project.address || "",
+            company: project.company || "",
           });
         } catch (error) {
           console.error("Error fetching project details:", error);
@@ -94,6 +96,7 @@ ${projectDetails.company}`
   }, [contractor, taskName, projectDetails]);
 
   const handleSend = async () => {
+    if (isSending) return; // <-- prevent double execution
     if (!subject || !message) {
       toast({
         title: "Error",
@@ -109,18 +112,17 @@ ${projectDetails.company}`
       const emailContent = {
         title: subject,
         content: message,
-        userId: contractor.id,
-        email: contractor.email,
-        taskName: taskName,
-        projectName: projectDetails.name,
+        to_user_id: contractor.id,
+        task_id: taskId,
       };
+
+      console.log("Email content:", emailContent);
 
       // 调用API发送邮件
       await taskDetailAPI.sendEmail(projectId, emailContent);
 
       // 关闭对话框并通知父组件
       onOpenChange(false);
-      if (onSend) onSend(true);
 
       toast({
         title: "Success",
@@ -133,7 +135,6 @@ ${projectDetails.company}`
         description: "Failed to send reminder email",
         variant: "destructive",
       });
-      if (onSend) onSend(false);
     } finally {
       setIsSending(false);
     }

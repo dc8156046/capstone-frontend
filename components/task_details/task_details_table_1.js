@@ -54,6 +54,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { taskDetailAPI } from "@/services/taskDetail";
+import { userAPI } from "@/services";
 
 export function TaskDetailsTable1({ projectId, projectData }) {
   // State
@@ -63,6 +64,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
     open: false,
     contractor: null,
     taskName: "",
+    taskId: null,
   });
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
@@ -253,36 +255,27 @@ export function TaskDetailsTable1({ projectId, projectData }) {
           setTasks([]);
         }
 
-        const companyId = projectData?.project?.company_id;
-        console.log("Company ID:", companyId);
-        if (companyId) {
-          console.log(`Fetching users for companyId: ${companyId}`);
-          const usersData = await taskDetailAPI.getUser(companyId);
-          console.log("Raw users data:", usersData);
-          if (usersData && Array.isArray(usersData)) {
-            const contractorsData = usersData.map((user) => ({
-              id: user.id,
-              name: user.name || user.username || user.email || "Unknown",
-              email: user.email,
-            }));
-            console.log("Contractors data:", contractorsData);
-            setContractors(contractorsData);
-          } else {
-            console.error("Invalid users data structure:", usersData);
-            toast({
-              title: "Data Error",
-              description: "Failed to load contractors data.",
-              variant: "destructive",
-            });
-            setContractors([]);
-          }
+        const usersData = await userAPI.getUsers();
+        console.log("Raw users data:", usersData);
+        if (usersData && Array.isArray(usersData)) {
+          const contractorsData = usersData.map((user) => ({
+            id: user.id,
+            name:
+              user.first_name && user.last_name
+                ? `${user.first_name} ${user.last_name}`
+                : user.email,
+            email: user.email,
+          }));
+          console.log("Contractors data:", contractorsData);
+          setContractors(contractorsData);
         } else {
-          console.error("No companyId available in project data");
+          console.error("Invalid users data structure:", usersData);
           toast({
             title: "Data Error",
-            description: "No company ID found in project data.",
+            description: "Failed to load contractors data.",
             variant: "destructive",
           });
+          setContractors([]);
         }
 
         setStatusOptions([
@@ -369,7 +362,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
                     {assignee
                       ? contractors.find((c) => c.id === assignee)?.name ||
                         contractors.find((c) => c.id === assignee)?.email ||
-                        "Unknown"
+                        "Unassigned"
                       : "Select Contractor"}
                   </SelectValue>
                 </SelectTrigger>
@@ -393,10 +386,12 @@ export function TaskDetailsTable1({ projectId, projectData }) {
                     setReminderDialog({
                       open: true,
                       contractor: {
+                        id: contractor.id,
                         name: contractor.name || contractor.email || "Unknown",
                         email: contractor.email || "",
                       },
                       taskName: task.name || "Unknown Task",
+                      taskId: task.id,
                     });
                   } else {
                     console.error(
@@ -704,47 +699,73 @@ export function TaskDetailsTable1({ projectId, projectData }) {
       }
       const apiUpdates = {
         task_id: taskId,
-        name: task.name,
-        priority: "low",
-        address: "",
-        postal_code: "",
-        city_id: 0,
-        province_id: 0,
+        assignee_id: task.assignTo || null,
+        status: task.status || "pending", // Default to "pending"
+        end_date: task.endDate ? new Date(task.endDate).toISOString() : null,
+        actual_end_date: task.actualEndDate
+          ? new Date(task.actualEndDate).toISOString()
+          : null,
         budget: task.budget || 0,
-        status: task.status || "pending",
-        start_date: task.dueDate
-          ? task.dueDate.toISOString()
-          : new Date().toISOString(),
-        estimated_duration: 0,
-        assignee_id: task.assignTo || 0,
-        company_id: projectData?.project?.company_id || 0,
-        note: task.notes || "",
+        amount_due: task.amountDue || 0, // assuming task.amountDue exists
+        dependency: task.dependency || null,
+        duration: task.duration || null, // default duration to 1
+        notes: task.notes || "",
       };
 
-      if (updates.assignTo !== undefined)
+      if (updates.assignTo !== undefined) {
         apiUpdates.assignee_id = updates.assignTo;
+      }
+
       if (updates.status !== undefined) {
-        const validStatuses = statusOptions.map((option) => option.value);
+        const validStatuses = [
+          "pending",
+          "in_progress",
+          "completed",
+          "delayed",
+        ];
         if (!validStatuses.includes(updates.status)) {
           throw new Error(`Invalid status value: ${updates.status}`);
         }
         apiUpdates.status = updates.status;
       }
+
       if (updates.dueDate !== undefined) {
         apiUpdates.start_date =
           updates.dueDate instanceof Date
             ? updates.dueDate.toISOString()
             : updates.dueDate;
       }
+
       if (updates.budget !== undefined) apiUpdates.budget = updates.budget;
+
       if (updates.pay_due !== undefined)
         apiUpdates.amount_due = updates.pay_due;
+
       if (updates.dependence !== undefined)
         apiUpdates.dependency = parseInt(updates.dependence, 10);
-      if (updates.notes !== undefined) apiUpdates.note = updates.notes;
 
+      if (updates.notes !== undefined) apiUpdates.notes = updates.notes;
+
+      if (updates.endDate !== undefined) {
+        apiUpdates.end_date =
+          updates.endDate instanceof Date
+            ? updates.endDate.toISOString()
+            : updates.endDate;
+      }
+
+      if (updates.actualEndDate !== undefined) {
+        apiUpdates.actual_end_date =
+          updates.actualEndDate instanceof Date
+            ? updates.actualEndDate.toISOString()
+            : updates.actualEndDate;
+      }
+
+      if (updates.duration !== undefined) {
+        apiUpdates.duration = updates.duration;
+      }
+      console.log("project id:", projectId);
       console.log("Sending update request with data:", apiUpdates);
-      await taskDetailAPI.updateTask(projectId, taskId, apiUpdates);
+      await taskDetailAPI.updateTask(projectId, apiUpdates);
     } catch (error) {
       console.error("Failed to update task:", error);
       let errorMessage = "Failed to update task.";
@@ -1054,7 +1075,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
   const handleDeleteTask = async (taskId) => {
     try {
       setTasks((prevTasks) => removeTaskLocally(prevTasks, taskId));
-      await taskDetailAPI.deleteTask(projectId, { taskId });
+      await taskDetailAPI.deleteTask(projectId, taskId);
       toast({
         title: "Success",
         description: "Task deleted successfully",
@@ -1260,19 +1281,13 @@ export function TaskDetailsTable1({ projectId, projectData }) {
             open,
             contractor: open ? reminderDialog.contractor : null,
             taskName: open ? reminderDialog.taskName : "",
+            taskId: open ? reminderDialog.taskId : null,
           });
         }}
         contractor={reminderDialog.contractor}
         taskName={reminderDialog.taskName || ""}
-        projectName="Project XXX"
-        onSend={() => {
-          if (reminderDialog.contractor) {
-            handleSendReminder(
-              reminderDialog.contractor,
-              reminderDialog.taskName
-            );
-          }
-        }}
+        taskId={reminderDialog.taskId}
+        projectId={projectId}
       />
 
       <DeleteDialog

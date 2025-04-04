@@ -27,7 +27,7 @@ export default function ContractorPage() {
         const updatedProjects = response.map(({ project, tasks }) => ({
           project: {
             ...project,
-            status: determineProjectStatus(project.start_date, project.end_date),
+            //status: determineProjectStatus(project.start_date, project.end_date),
           },
           tasks,
         }));
@@ -49,6 +49,7 @@ export default function ContractorPage() {
     fetchProjects();
   }, []);
 
+  /*
   const determineProjectStatus = (start_date, end_date) => {
     if (!start_date || !end_date) return "Pending";
 
@@ -62,7 +63,8 @@ export default function ContractorPage() {
 
     return "Pending";
   };
-
+  */
+ 
   const toggleProject = (projectId) => {
     setOpenProjects((prev) => ({
       ...prev,
@@ -134,6 +136,7 @@ export default function ContractorPage() {
                         <p className="text-sm text-gray-500">
                           Due: {new Date(project.end_date).toLocaleDateString()}
                         </p>
+                        {/* 
                         <p className="text-sm text-gray-500">
                           Status: 
                           <span
@@ -148,7 +151,7 @@ export default function ContractorPage() {
                             {project.status}
                           </span>
                         </p>
-
+                        */}
                         {/* Task List */}
                         <div className="mt-4 space-y-2">
                           <h3 className="text-md font-medium">Tasks</h3>
