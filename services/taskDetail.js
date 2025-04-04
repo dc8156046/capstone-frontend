@@ -9,7 +9,7 @@ export const taskDetailAPI = {
   addTask: (id, data) => apiService.post(`/projects/${id}/tasks`, data),
   updateTask: (id, data) => apiService.put(`/projects/${id}/tasks`, data),
   deleteTask: (id, taskId) =>
-    apiService.delete(`/projects/${id}/tasks/${taskId}`),
+    apiService.delete(`/projects/${id}/tasks?task_id=${taskId}`),
   sendEmail: (id, data) => apiService.post(`/projects/${id}/send-email`, data),
   getCategory: () => apiService.post("/tasks/categories"),
   getSubtask: (id) => apiService.post(`/tasks/${id}/subtasks`),

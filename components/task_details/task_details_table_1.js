@@ -1075,7 +1075,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
   const handleDeleteTask = async (taskId) => {
     try {
       setTasks((prevTasks) => removeTaskLocally(prevTasks, taskId));
-      await taskDetailAPI.deleteTask(projectId, { taskId });
+      await taskDetailAPI.deleteTask(projectId, taskId);
       toast({
         title: "Success",
         description: "Task deleted successfully",
