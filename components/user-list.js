@@ -97,8 +97,16 @@ export default function UserList() {
 
   const handleUpdateUser = async (e) => {
     e.preventDefault();
+    const { password, ...otherData } = formData;
+    const updatedData = otherData;
+    if (password) {
+      updatedData.password = password;
+    } else {
+      updatedData.password = null;
+    }
+
     console.log(formData);
-    const data = await userAPI.updateUser(currentUser.id, formData);
+    const data = await userAPI.updateUser(currentUser.id, updatedData);
     if (data) {
       const updatedUsers = users.map((user) =>
         user.id === data.id ? data : user
