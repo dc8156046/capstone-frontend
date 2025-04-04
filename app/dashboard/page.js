@@ -72,14 +72,14 @@ export default function DashboardPage() {
           </Card>
 
           {projects.length > 0 ? (
-            <div className="grid grid-cols-4 gap-6">
+            <div className="grid grid-cols-4 gap-6 text-center">
               {Object.entries(groupedProjects).map(([status, projectList]) => (
                 <div key={status} className="space-y-4">
                   <h2 className="text-xl font-semibold">{status}</h2>
                   <ul className="space-y-2">
                     {projectList.map((project) => (
-                      <Link key={project.id} href={`dashboard/projects/${project.id}`}>
-                        <li className="p-4 bg-white shadow rounded-lg text-center max-w-52 cursor-pointer hover:shadow-lg transition">
+                      <Link key={project.id} href={`dashboard/project/${project.id}`}>
+                        <li className="p-4 bg-white shadow rounded-lg text-center max-w-52 cursor-pointer hover:shadow-lg transition mb-4">
                           <p className="text-lg font-bold">{project.name}</p>
                           <p className="text-sm mt-2">{project.address}</p>
                           <p className="text-sm mt-2">
