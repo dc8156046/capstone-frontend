@@ -38,7 +38,7 @@ export default function DashboardPage() {
         <h1 className="text-2xl font-bold">Dashboard</h1>
 
         {projects.length > 0 && (
-          <Link href="dashboard/project/create">
+          <Link href="/dashboard/project/create">
             <button className="w-40 h-12 bg-cyan-800 text-white rounded-lg flex items-center justify-center space-x-2 hover:bg-cyan-700">
               <Plus size={24} className="border rounded-full bg-white text-cyan-700" />
               <span className="text-lg font-semibold">Add Project</span>
@@ -78,29 +78,31 @@ export default function DashboardPage() {
                   <h2 className="text-xl font-semibold">{status}</h2>
                   <ul className="space-y-2">
                     {projectList.map((project) => (
-                      <li key={project.id} className="p-4 bg-white shadow rounded-lg text-center max-w-52">
-                        <p className="text-lg font-bold">{project.name}</p>
-                        <p className="text-sm mt-2">{project.address}</p>
-                        <p className="text-sm mt-2">
-                          {project.start_date ? project.start_date.split("T")[0] : ""} - {" "}
-                          {project.end_date ? project.end_date.split("T")[0] : ""}
-                        </p>
-                        <p
-                          className={`text-sm text-white rounded-full mt-3 py-1 ${
-                            project.status === "pending"
-                              ? "bg-gray-600"
-                              : project.status === "in_progress"
-                              ? "bg-cyan-600"
-                              : project.status === "completed"
-                              ? "bg-green-600"
-                              : project.status === "delayed"
-                              ? "bg-red-600"
-                              : ""
-                          }`}
-                        >
-                          {project.status}
-                        </p>
-                      </li>
+                      <Link key={project.id} href={`dashboard/projects/${project.id}`}>
+                        <li className="p-4 bg-white shadow rounded-lg text-center max-w-52 cursor-pointer hover:shadow-lg transition">
+                          <p className="text-lg font-bold">{project.name}</p>
+                          <p className="text-sm mt-2">{project.address}</p>
+                          <p className="text-sm mt-2">
+                            {project.start_date ? project.start_date.split("T")[0] : ""} - {" "}
+                            {project.end_date ? project.end_date.split("T")[0] : ""}
+                          </p>
+                          <p
+                            className={`text-sm text-white rounded-full mt-3 py-1 ${
+                              project.status === "pending"
+                                ? "bg-gray-600"
+                                : project.status === "in_progress"
+                                ? "bg-cyan-600"
+                                : project.status === "completed"
+                                ? "bg-green-600"
+                                : project.status === "delayed"
+                                ? "bg-red-600"
+                                : ""
+                            }`}
+                          >
+                            {project.status}
+                          </p>
+                        </li>
+                      </Link>
                     ))}
                   </ul>
                 </div>
@@ -108,7 +110,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <Link href="dashboard/project/create">
+              <Link href="/dashboard/project/create">
                 <button className="w-32 h-32 flex items-center justify-center bg-cyan-800 text-white rounded-full shadow-lg hover:bg-cyan-700 mt-8">
                   <Plus size={64} />
                 </button>

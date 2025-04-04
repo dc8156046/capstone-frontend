@@ -106,8 +106,9 @@ const ProjectDetail = () => {
           router.push("/");
           return;
         }
-
+        //console.log(projectId);
         const response = await taskDetailAPI.getProjectDetail(projectId);
+        //console.log(response);
         const { project, tasks: projectTasks } = response;
 
         setProjectData({
