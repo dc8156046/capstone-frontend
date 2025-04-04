@@ -53,11 +53,16 @@ export default function UserList() {
     email: "",
     password: "",
   });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [userIdToDelete, setUserIdToDelete] = useState("");
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -88,27 +93,6 @@ export default function UserList() {
       password: "",
     });
   };
-
-  // const handleAddUser = async (e) => {
-  //   e.preventDefault();
-  //   setSubmitting(true);
-
-  //   try {
-  //     const response = await userAPI.addUser(formData);
-  //     setUsers((prev) => [...prev, response]);
-  //     setIsAddDialogOpen(false);
-  //     resetFormData();
-  //   } catch (err) {
-  //     console.error("Error adding user:", err);
-  //     alert(
-  //       `Failed to add user: ${
-  //         err.data?.detail || err.statusText || "Unknown error"
-  //       }`
-  //     );
-  //   } finally {
-  //     setSubmitting(false);
-  //   }
-  // };
 
   const handleUpdateUser = async (e) => {
     e.preventDefault();
@@ -296,7 +280,7 @@ export default function UserList() {
         {error && (
           <div className="mb-4 p-4 border border-destructive/50 rounded bg-destructive/10 text-destructive flex items-center">
             <AlertCircle className="h-5 w-5 mr-2" />
-            <p>{error}</p>
+            {/* <p>{error}</p> */}
           </div>
         )}
 
@@ -318,10 +302,6 @@ export default function UserList() {
                       Last Name
                     </th>
                     <th className="py-3 px-4 text-left font-medium">Email</th>
-                    <th className="py-3 px-4 text-left font-medium">Role</th>
-                    <th className="py-3 px-4 text-right font-medium">
-                      Actions
-                    </th>
                   </tr>
                 </thead>
                 <tbody>
