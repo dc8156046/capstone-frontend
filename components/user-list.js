@@ -82,6 +82,7 @@ export default function UserList() {
     formData.email = email;
     formData.password = password;
     const response = await userAPI.addUser(formData);
+    console.log(response);
     if (response) {
       setUsers((prev) => [...prev, response]);
     }
@@ -280,7 +281,7 @@ export default function UserList() {
         {error && (
           <div className="mb-4 p-4 border border-destructive/50 rounded bg-destructive/10 text-destructive flex items-center">
             <AlertCircle className="h-5 w-5 mr-2" />
-            {/* <p>{error}</p> */}
+            <p>{error}</p>
           </div>
         )}
 
@@ -320,9 +321,6 @@ export default function UserList() {
                         <td className="py-3 px-4">{user.first_name}</td>
                         <td className="py-3 px-4">{user.last_name}</td>
                         <td className="py-3 px-4">{user.email}</td>
-                        <td className="py-3 px-4 capitalize">
-                          {user.role || "user"}
-                        </td>
                         <td className="py-3 px-4 text-right">
                           <Button
                             variant="ghost"
