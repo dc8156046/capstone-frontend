@@ -57,31 +57,31 @@ export default function Home() {
     try {
       const response = await userAPI.login(email, password);
       console.log(response);
-      // if (typeof window !== "undefined") {
-      //   localStorage.setItem("token", response.access_token);
-      //   localStorage.setItem("email", email);
-      //   localStorage.setItem("type", response.type);
-      // }
-
-      // document.cookie = `auth_token=${response.access_token}; path=/; max-age=${
-      //   60 * 30
-      // };`;
       if (typeof window !== "undefined") {
         localStorage.setItem("token", response.access_token);
         localStorage.setItem("email", email);
         localStorage.setItem("type", response.type);
-
-        const cookies = document.cookie.split(";").reduce((acc, cookie) => {
-          const [name, value] = cookie.trim().split("=");
-          acc[name] = value;
-          return acc;
-        }, {});
-        if (!cookies["auth_token"]) {
-          document.cookie = `auth_token=${
-            response.access_token
-          }; path=/; max-age=${60 * 30};`;
-        }
       }
+
+      document.cookie = `auth_token=${response.access_token}; path=/; max-age=${
+        60 * 30
+      };`;
+      // if (typeof window !== "undefined") {
+      //   localStorage.setItem("token", response.access_token);
+      //   localStorage.setItem("email", email);
+      //   localStorage.setItem("type", response.type);
+
+      //   const cookies = document.cookie.split(";").reduce((acc, cookie) => {
+      //     const [name, value] = cookie.trim().split("=");
+      //     acc[name] = value;
+      //     return acc;
+      //   }, {});
+      //   if (!cookies["auth_token"]) {
+      //     document.cookie = `auth_token=${
+      //       response.access_token
+      //     }; path=/; max-age=${60 * 30};`;
+      //   }
+      // }
 
       alert("Login successful");
       if (response.type === "admin") {
