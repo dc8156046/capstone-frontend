@@ -93,7 +93,9 @@ export default function DashboardPage() {
             <div className="grid grid-cols-4 gap-6 text-center">
               {Object.entries(groupedProjects).map(([status, projectList]) => (
                 <div key={status} className="space-y-4">
-                  <h2 className="text-xl font-semibold ">{status}</h2>
+                  <h2 className="text-xl font-semibold text-left px-14">
+                    {status}
+                  </h2>
                   <ul className="space-y-2">
                     {projectList.map((project) => (
                       <Link
