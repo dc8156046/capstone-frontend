@@ -22,19 +22,19 @@ export default function Home() {
 
   const router = useRouter();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const type = localStorage.getItem("type");
-    if (token) {
-      if (type === "admin") {
-        router.push("/dashboard");
-      } else if (type === "contractor") {
-        router.push("/contractor-page");
-      } else {
-        alert("Failed to sign in.");
-      }
-    }
-  }, []);
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+  //   const type = localStorage.getItem("type");
+  //   if (token) {
+  //     if (type === "admin") {
+  //       router.push("/dashboard");
+  //     } else if (type === "contractor") {
+  //       router.push("/contractor-page");
+  //     } else {
+  //       alert("Failed to sign in.");
+  //     }
+  //   }
+  // }, [router]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -57,14 +57,32 @@ export default function Home() {
     try {
       const response = await userAPI.login(email, password);
       console.log(response);
+      // if (typeof window !== "undefined") {
+      //   localStorage.setItem("token", response.access_token);
+      //   localStorage.setItem("email", email);
+      //   localStorage.setItem("type", response.type);
+      // }
+
+      // document.cookie = `auth_token=${response.access_token}; path=/; max-age=${
+      //   60 * 30
+      // };`;
       if (typeof window !== "undefined") {
         localStorage.setItem("token", response.access_token);
         localStorage.setItem("email", email);
         localStorage.setItem("type", response.type);
+
+        const cookies = document.cookie.split(";").reduce((acc, cookie) => {
+          const [name, value] = cookie.trim().split("=");
+          acc[name] = value;
+          return acc;
+        }, {});
+        if (!cookies["auth_token"]) {
+          document.cookie = `auth_token=${
+            response.access_token
+          }; path=/; max-age=${60 * 30};`;
+        }
       }
-      document.cookie = `auth_token=${response.access_token}; path=/; max-age=${
-        60 * 60 * 24
-      };`;
+
       alert("Login successful");
       if (response.type === "admin") {
         router.push("/dashboard");
