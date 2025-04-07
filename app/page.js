@@ -110,10 +110,10 @@ export default function Home() {
         <Card className="w-full max-w-md bg-white text-black">
           <CardHeader className="space-y-2">
             <CardTitle className="text-2xl font-bold text-center">
-              Login to BrickByClick
+              Log In
             </CardTitle>
             <CardDescription className="text-center">
-              Enter your email and password
+              Brick by click, track with a flick.
             </CardDescription>
           </CardHeader>
           <CardContent>
