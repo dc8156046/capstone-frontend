@@ -23,6 +23,13 @@ export default function ProjectListPage() {
     fetchProjects();
   }, []);
 
+  const statusDisplayMap = {
+    in_progress: "In Progress",
+    pending: "Upcoming",
+    completed: "Complete",
+    delayed: "Delayed",
+  };
+
   return (
     <div className="p-6">
       <h2 className="font-bold text-2xl mt-4">Project List</h2>
@@ -46,7 +53,9 @@ export default function ProjectListPage() {
           >
             <div>{project.name}</div>
             <div>{project.address}</div>
-            <div>{project.start_date ? project.start_date.split("T")[0] : ""}</div>
+            <div>
+              {project.start_date ? project.start_date.split("T")[0] : ""}
+            </div>
             <div>{project.end_date ? project.end_date.split("T")[0] : ""}</div>
             <div>${project.budget}</div>
             <div
@@ -62,7 +71,8 @@ export default function ProjectListPage() {
                   : ""
               }`}
             >
-              {project.status}
+              {/* {project.status} */}
+              {statusDisplayMap[project.status] || project.status}
             </div>
           </div>
         ))
