@@ -146,7 +146,7 @@ export default function Home() {
                   />
                 </div>
               </div>
-              <div>
+              <div className=" flex justify-between">
                 <Link
                   href="/create-account"
                   className="text-sm text-primary hover:underline"
