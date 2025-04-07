@@ -26,10 +26,18 @@ export default function DashboardPage() {
   }, []);
 
   const groupedProjects = {
-    "In Progress": projects.filter((project) => project.status === "in_progress"),
+    "In Progress": projects.filter(
+      (project) => project.status === "in_progress"
+    ),
     Upcoming: projects.filter((project) => project.status === "pending"),
     Complete: projects.filter((project) => project.status === "completed"),
     Delayed: projects.filter((project) => project.status === "delayed"),
+  };
+  const statusDisplayMap = {
+    in_progress: "In Progress",
+    pending: "Upcoming",
+    completed: "Complete",
+    delayed: "Delayed",
   };
 
   return (
@@ -40,7 +48,10 @@ export default function DashboardPage() {
         {projects.length > 0 && (
           <Link href="/dashboard/project/create">
             <button className="w-40 h-12 bg-cyan-800 text-white rounded-lg flex items-center justify-center space-x-2 hover:bg-cyan-700">
-              <Plus size={24} className="border rounded-full bg-white text-cyan-700" />
+              <Plus
+                size={24}
+                className="border rounded-full bg-white text-cyan-700"
+              />
               <span className="text-lg font-semibold">Add Project</span>
             </button>
           </Link>
@@ -49,7 +60,9 @@ export default function DashboardPage() {
 
       {loading ? (
         <div className="flex justify-center items-center">
-          <span className="text-lg font-semibold text-gray-700">Loading Projects...</span>
+          <span className="text-lg font-semibold text-gray-700">
+            Loading Projects...
+          </span>
         </div>
       ) : (
         <>
@@ -57,12 +70,17 @@ export default function DashboardPage() {
             <CardContent className="p-6 space-y-4">
               <h2 className="text-xl font-semibold">Project Overview</h2>
               <div className="grid grid-cols-5 gap-5 text-center">
-                {Object.entries(groupedProjects).map(([status, projectList]) => (
-                  <div key={status} className="p-4 bg-gray-100 rounded-xl text-black">
-                    <p className="text-lg font-bold">{projectList.length}</p>
-                    <p className="text-sm font-semibold">{status}</p>
-                  </div>
-                ))}
+                {Object.entries(groupedProjects).map(
+                  ([status, projectList]) => (
+                    <div
+                      key={status}
+                      className="p-4 bg-gray-100 rounded-xl text-black"
+                    >
+                      <p className="text-lg font-bold">{projectList.length}</p>
+                      <p className="text-sm font-semibold">{status}</p>
+                    </div>
+                  )
+                )}
                 <div className="p-4 bg-gray-100 rounded-xl text-black">
                   <p className="text-lg font-bold">{projects.length}</p>
                   <p className="text-sm font-semibold">Total Projects</p>
@@ -75,16 +93,24 @@ export default function DashboardPage() {
             <div className="grid grid-cols-4 gap-6 text-center">
               {Object.entries(groupedProjects).map(([status, projectList]) => (
                 <div key={status} className="space-y-4">
-                  <h2 className="text-xl font-semibold">{status}</h2>
+                  <h2 className="text-xl font-semibold ">{status}</h2>
                   <ul className="space-y-2">
                     {projectList.map((project) => (
-                      <Link key={project.id} href={`dashboard/project/${project.id}`}>
+                      <Link
+                        key={project.id}
+                        href={`dashboard/project/${project.id}`}
+                      >
                         <li className="p-4 bg-white shadow rounded-lg text-center max-w-52 cursor-pointer hover:shadow-lg transition mb-4">
                           <p className="text-lg font-bold">{project.name}</p>
                           <p className="text-sm mt-2">{project.address}</p>
                           <p className="text-sm mt-2">
-                            {project.start_date ? project.start_date.split("T")[0] : ""} - {" "}
-                            {project.end_date ? project.end_date.split("T")[0] : ""}
+                            {project.start_date
+                              ? project.start_date.split("T")[0]
+                              : ""}{" "}
+                            -{" "}
+                            {project.end_date
+                              ? project.end_date.split("T")[0]
+                              : ""}
                           </p>
                           <p
                             className={`text-sm text-white rounded-full mt-3 py-1 ${
@@ -99,7 +125,8 @@ export default function DashboardPage() {
                                 : ""
                             }`}
                           >
-                            {project.status}
+                            {/* {project.status} */}
+                            {statusDisplayMap[project.status] || project.status}
                           </p>
                         </li>
                       </Link>
