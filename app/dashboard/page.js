@@ -47,12 +47,12 @@ export default function DashboardPage() {
 
         {projects.length > 0 && (
           <Link href="/dashboard/project/create">
-            <button className="w-40 h-12 bg-cyan-800 text-white rounded-lg flex items-center justify-center space-x-2 hover:bg-cyan-700">
+            <button className="w-48 h-14 bg-[#16325b] text-white rounded-lg flex items-center justify-center space-x-3 shadow-lg hover:bg-[#227b94] ">
               <Plus
                 size={24}
-                className="border rounded-full bg-white text-cyan-700"
+                className="border rounded-full bg-white text-[#16325b] hover:text-[#227b94]"
               />
-              <span className="text-lg font-semibold">Add Project</span>
+              <span className="text-lg ">Add Project</span>
             </button>
           </Link>
         )}
@@ -68,7 +68,7 @@ export default function DashboardPage() {
         <>
           <Card>
             <CardContent className="p-6 space-y-4">
-              <h2 className="text-xl font-semibold">Project Overview</h2>
+              <h2 className="text-xl ">Project Overview</h2>
               <div className="grid grid-cols-5 gap-5 text-center">
                 {Object.entries(groupedProjects).map(
                   ([status, projectList]) => (
@@ -77,53 +77,53 @@ export default function DashboardPage() {
                       className="p-4 bg-gray-100 rounded-xl text-black"
                     >
                       <p className="text-lg font-bold">{projectList.length}</p>
-                      <p className="text-sm font-semibold">{status}</p>
+                      <p className="text-sm ">{status}</p>
                     </div>
                   )
                 )}
                 <div className="p-4 bg-gray-100 rounded-xl text-black">
                   <p className="text-lg font-bold">{projects.length}</p>
-                  <p className="text-sm font-semibold">Total Projects</p>
+                  <p className="text-sm ">Total Projects</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {projects.length > 0 ? (
-            <div className="grid grid-cols-4 gap-6 text-center">
+            <div className="grid grid-cols-4 gap-6 text-center pt-6 ">
               {Object.entries(groupedProjects).map(([status, projectList]) => (
-                <div key={status} className="space-y-4">
-                  <h2 className="text-xl font-semibold text-left px-14">
-                    {status}
-                  </h2>
+                <div key={status} className="space-y-4 ">
+                  <h2 className="text-xl  text-left ">{status}</h2>
                   <ul className="space-y-2">
                     {projectList.map((project) => (
                       <Link
                         key={project.id}
                         href={`dashboard/project/${project.id}`}
                       >
-                        <li className="p-4 bg-white shadow rounded-lg text-center max-w-52 cursor-pointer hover:shadow-lg transition mb-4">
-                          <p className="text-lg font-bold">{project.name}</p>
-                          <p className="text-sm mt-2">{project.address}</p>
-                          <p className="text-sm mt-2">
+                        <li className="p-6 bg-white shadow rounded-2xl text-center max-w-72 cursor-pointer hover:shadow-lg transition mb-4 flex flex-col h-52 items-center">
+                          <p className="text-2xl font-semibold">
+                            {project.name}
+                          </p>
+                          <p className="text-md mt-3">{project.address}</p>
+                          <p className="text-md mt-3">
                             {project.start_date
                               ? project.start_date.split("T")[0]
                               : ""}{" "}
-                            -{" "}
+                            ~{" "}
                             {project.end_date
                               ? project.end_date.split("T")[0]
                               : ""}
                           </p>
                           <p
-                            className={`text-sm text-white rounded-full mt-3 py-1 ${
+                            className={`text-sm text-white rounded-full mt-5 w-36 py-1 ${
                               project.status === "pending"
-                                ? "bg-gray-600"
+                                ? "bg-[#979797]"
                                 : project.status === "in_progress"
-                                ? "bg-cyan-600"
+                                ? "bg-[#78b7d0]"
                                 : project.status === "completed"
-                                ? "bg-green-600"
+                                ? "bg-[#59bd50]"
                                 : project.status === "delayed"
-                                ? "bg-red-600"
+                                ? "bg-[#f70e0e]"
                                 : ""
                             }`}
                           >

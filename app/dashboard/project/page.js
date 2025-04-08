@@ -63,7 +63,7 @@ export default function ProjectListPage() {
                 <div
                   className={`text-sm   rounded-full w-36 py-2 mx-auto text-white ${
                     project.status === "completed"
-                      ? "bg-green-600"
+                      ? "bg-[#59bd50]"
                       : project.status === "delayed"
                       ? "bg-[#f70e0e]"
                       : project.status === "pending"

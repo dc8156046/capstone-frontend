@@ -20,7 +20,7 @@ export default function AnalyticsPage() {
     <div className="p-6 space-y-6">
       {/* Dashboard Header */}
       <div>
-        <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
+        <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
         <p className="text-muted-foreground mt-1">
           Overview of all projects and individual project details
         </p>
