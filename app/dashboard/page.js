@@ -6,8 +6,6 @@ import { useState, useEffect } from "react";
 import { userAPI } from "@/services";
 import Link from "next/link";
 
-
-
 export default function DashboardPage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -141,10 +139,12 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <button className="w-32 h-32 flex items-center justify-center bg-cyan-800 text-white rounded-full shadow-lg hover:bg-cyan-700 mt-8" >
-                <Plus size={64} />
-              </button>
-              <span className="mt-2 text-gray-700 text-lg">Add Project</span>
+              <Link href="/dashboard/project/create">
+                <button className="w-32 h-32 flex items-center justify-center bg-cyan-800 text-white rounded-full shadow-lg hover:bg-cyan-700 mt-8">
+                  <Plus size={64} />
+                </button>
+                <span className="mt-2 text-gray-700 text-lg">Add Project</span>
+              </Link>
             </div>
           )}
         </>
