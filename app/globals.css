@@ -64,4 +64,14 @@
     @apply bg-background text-foreground;
   }
 }
+.notes-cell {
+  max-width: 150px; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.group:hover .notes-cell {
+  white-space: normal; 
+}
 

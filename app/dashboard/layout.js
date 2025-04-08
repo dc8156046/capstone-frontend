@@ -1,13 +1,11 @@
 "use client";
 import { UserNav } from "@/components/user-nav";
-import { MainNav } from "@/components/main-nav";
 import { Sidebar } from "@/components/sidebar";
 import Logo from "@/components/logo";
 import Link from "next/link";
 import { Footer } from "@/components/footer";
 import { CircleHelp } from "lucide-react";
 export default function DashboardLayout({ children }) {
-
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -16,14 +14,14 @@ export default function DashboardLayout({ children }) {
           <Link href="/dashboard" className="mr-4 hidden md:flex">
             <Logo />
           </Link>
-          <MainNav className="mx-6" />
+
           <div className="ml-auto flex items-center space-x-4">
             <Link href="/help-page">
-            <button>
-              <CircleHelp />
-            </button>
+              <button>
+                <CircleHelp />
+              </button>
             </Link>
-            <UserNav/>
+            <UserNav />
           </div>
         </div>
       </header>
@@ -31,17 +29,16 @@ export default function DashboardLayout({ children }) {
       {/* Main content */}
       <div className="flex-1 flex">
         {/* Sidebar */}
-        <aside className="hidden md:flex w-64 flex-shrink-0 border-r bg-background">
+        <aside className="hidden md:flex max-w-56 flex-shrink-0 border-r bg-background">
           <Sidebar />
         </aside>
 
         {/* Main content area */}
-        <main className="flex-1">
+        <main className="flex-1 bg-[#eef2f5]">
           <div className="container mx-auto py-6 px-4">{children}</div>
         </main>
       </div>
 
-      {/* Footer - 放在主flex容器之外 */}
       <Footer />
     </div>
   );

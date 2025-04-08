@@ -10,10 +10,21 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Pencil, Trash2, UserPlus } from "lucide-react";
+import { Pencil, Trash2, UserPlus, AlertCircle, Loader2 } from "lucide-react";
 import { userAPI } from "@/services";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function UserList() {
   const [users, setUsers] = useState([]);
@@ -41,13 +52,17 @@ export default function UserList() {
     last_name: "",
     email: "",
     password: "",
-    role: "user",
   });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [userIdToDelete, setUserIdToDelete] = useState("");
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -56,6 +71,7 @@ export default function UserList() {
       ...prev,
       [name]: value,
     }));
+    console.log(name, value);
   };
 
   // Add new user
@@ -66,6 +82,7 @@ export default function UserList() {
     formData.email = email;
     formData.password = password;
     const response = await userAPI.addUser(formData);
+    console.log(response);
     if (response) {
       setUsers((prev) => [...prev, response]);
     }
@@ -75,15 +92,21 @@ export default function UserList() {
       last_name: "",
       email: "",
       password: "",
-      role: "user",
     });
   };
 
-  // Update user
   const handleUpdateUser = async (e) => {
     e.preventDefault();
+    const { password, ...otherData } = formData;
+    const updatedData = otherData;
+    if (password) {
+      updatedData.password = password;
+    } else {
+      updatedData.password = null;
+    }
 
-    const data = await userAPI.updateUser(currentUser.id, formData);
+    console.log(formData);
+    const data = await userAPI.updateUser(currentUser.id, updatedData);
     if (data) {
       const updatedUsers = users.map((user) =>
         user.id === data.id ? data : user
@@ -95,16 +118,29 @@ export default function UserList() {
     setCurrentUser(null);
   };
 
-  // Delete user
-  const handleDeleteUser = async (userId) => {
-    if (!confirm("Are you sure you want to delete this user?")) return;
-    const response = await userAPI.deleteUser(userId);
-    if (!response) {
-      alert("Failed to delete user");
-      return;
+  const confirmDeleteUser = (userId) => {
+    setUserIdToDelete(userId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteUser = async () => {
+    setSubmitting(true);
+
+    try {
+      await userAPI.deleteUser(userIdToDelete);
+      setUsers(users.filter((user) => user.id !== userIdToDelete));
+      setIsDeleteDialogOpen(false);
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      alert(
+        `Failed to delete user: ${
+          err.data?.detail || err.statusText || "Unknown error"
+        }`
+      );
+    } finally {
+      setSubmitting(false);
+      setUserIdToDelete(null);
     }
-    const updatedUsers = users.filter((user) => user.id !== userId);
-    setUsers(updatedUsers);
   };
 
   const handleEditClick = (user) => {
@@ -114,18 +150,17 @@ export default function UserList() {
       last_name: user.last_name,
       email: user.email,
       password: "",
-      role: user.role,
     });
     setIsEditDialogOpen(true);
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>User Management</CardTitle>
+    <Card className="py-4">
+      <CardHeader className="flex flex-row items-center justify-between ">
+        <CardTitle className="text-2xl">User Management</CardTitle>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
+            <Button className="flex items-center gap-2 w-36 hover:bg-[#227b94] bg-[#16325b]">
               <UserPlus className="h-4 w-4" />
               Add User
             </Button>
@@ -133,6 +168,9 @@ export default function UserList() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New User</DialogTitle>
+              <DialogDescription>
+                Create a new user account with the form below.
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAddUser} className="space-y-4">
               <div className="space-y-2">
@@ -140,18 +178,18 @@ export default function UserList() {
                 <Input
                   id="first_name"
                   name="first_name"
-                  value={firstname}
-                  onChange={(e) => setFirstname(e.target.value)}
+                  value={formData.first_name}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="first_name">Last Name</Label>
+                <Label htmlFor="last_name">Last Name</Label>
                 <Input
                   id="last_name"
                   name="last_name"
-                  value={lastname}
-                  onChange={(e) => setLastname(e.target.value)}
+                  value={formData.last_name}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
@@ -161,8 +199,8 @@ export default function UserList() {
                   id="email"
                   name="email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={formData.email}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
@@ -172,26 +210,12 @@ export default function UserList() {
                   id="password"
                   name="password"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={formData.password}
+                  onChange={handleInputChange}
                   required
                 />
               </div>
-              {/*
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <select
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              */}
+
               <Button type="submit" className="w-full">
                 Add User
               </Button>
@@ -203,12 +227,16 @@ export default function UserList() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Edit User</DialogTitle>
+              <DialogDescription>
+                Update user information. Leave password blank to keep the
+                current password.
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleUpdateUser} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="first_name">First name</Label>
+                <Label htmlFor="edit-first_name">First Name</Label>
                 <Input
-                  id="first_name"
+                  id="edit-first_name"
                   name="first_name"
                   value={formData.first_name}
                   onChange={handleInputChange}
@@ -216,9 +244,9 @@ export default function UserList() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="first_name">Last name</Label>
+                <Label htmlFor="edit-last_name">Last Name</Label>
                 <Input
-                  id="last_name"
+                  id="edit-last_name"
                   name="last_name"
                   value={formData.last_name}
                   onChange={handleInputChange}
@@ -248,21 +276,7 @@ export default function UserList() {
                   onChange={handleInputChange}
                 />
               </div>
-              {/*
-              <div className="space-y-2">
-                <Label htmlFor="edit-role">Role</Label>
-                <select
-                  id="edit-role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              */}
+
               <Button type="submit" className="w-full">
                 Update User
               </Button>
@@ -272,60 +286,108 @@ export default function UserList() {
       </CardHeader>
 
       <CardContent>
-        <div className="rounded-md border">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b bg-muted/50">
-                <tr>
-                  <th className="py-3 px-4 text-left font-medium">
-                    First name
-                  </th>
-                  <th className="py-3 px-4 text-left font-medium">Last name</th>
-                  <th className="py-3 px-4 text-left font-medium">Email</th>
-                  {/*<th className="py-3 px-4 text-left font-medium">Role</th>*/}
-                  <th className="py-3 px-4 text-right font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.length === 0 ? (
+        {error && (
+          <div className="mb-4 p-4 border border-destructive/50 rounded bg-destructive/10 text-destructive flex items-center">
+            <AlertCircle className="h-5 w-5 mr-2" />
+            <p>{error}</p>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex justify-center items-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-2">Loading users...</span>
+          </div>
+        ) : (
+          <div className="rounded-md border">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b ">
                   <tr>
-                    <td colSpan="4" className="py-3 px-4 text-center">
-                      No users found
-                    </td>
+                    <th className="py-3 px-4 text-left font-semibold">
+                      First Name
+                    </th>
+                    <th className="py-3 px-4 text-left font-semibold">
+                      Last Name
+                    </th>
+                    <th className="py-3 px-4 text-left font-semibold">Email</th>
                   </tr>
-                ) : (
-                  users.map((user) => (
-                    <tr key={user.id} className="border-b">
-                      <td className="py-3 px-4">{user.first_name}</td>
-                      <td className="py-3 px-4">{user.last_name}</td>
-                      <td className="py-3 px-4">{user.email}</td>
-                      {/*<td className="py-3 px-4">{user.role}</td>*/}
-                      <td className="py-3 px-4 text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditClick(user)}
-                          className="mr-2"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteUser(user.id)}
-                          className="text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                </thead>
+                <tbody>
+                  {users.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="5"
+                        className="py-8 px-4 text-center text-muted-foreground"
+                      >
+                        No users found
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    users.map((user) => (
+                      <tr key={user.id} className="border-b">
+                        <td className="py-3 px-4">{user.first_name}</td>
+                        <td className="py-3 px-4">{user.last_name}</td>
+                        <td className="py-3 px-4">{user.email}</td>
+                        <td className="py-3 px-4 text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditClick(user)}
+                            className="mr-2"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => confirmDeleteUser(user.id)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
+
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm User Deletion</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this user? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={submitting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              disabled={submitting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

@@ -1,14 +1,17 @@
+import { icons } from "lucide-react";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata = {
-  title: "Capstone Project - BrickbyClick",
-  description: "BricksbyClick Capstone Project",
+  title: "BrickbyClick",
+  description: "BrickbyClick Capstone Project",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>{children}</body>
+      <Toaster />
     </html>
   );
 }

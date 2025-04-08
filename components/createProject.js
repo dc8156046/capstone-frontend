@@ -128,6 +128,26 @@ const CreateProject = () => {
         currentTaskIds.push(taskId);
       }
 
+      const category = tasks.find((cat) => cat.id === categoryId);
+      if (!category) return prevData;
+
+      const categoryTaskIds = category.children.map((task) => task.id);
+
+      // Check if any task in the category is selected
+      const anyTaskSelected = categoryTaskIds.some((id) =>
+        currentTaskIds.includes(id)
+      );
+
+      if (anyTaskSelected) {
+        // If at least one task is selected, ensure categoryId is also selected
+        if (!currentTaskIds.includes(category.id)) {
+          currentTaskIds.push(category.id);
+        }
+      } else {
+        // If no task is selected, remove categoryId from the list
+        currentTaskIds = currentTaskIds.filter((id) => id !== category.id);
+      }
+
       return {
         ...prevData,
         task_ids: currentTaskIds,
@@ -145,7 +165,11 @@ const CreateProject = () => {
       const categoryTaskIds = category.children.map((task) => task.id);
 
       // Check if all category tasks are already selected
-      const allSelected = categoryTaskIds.every((taskId) =>
+      // const allSelected = categoryTaskIds.every((taskId) =>
+      //   currentTaskIds.includes(taskId)
+      // );
+
+      const allSelected = [category.id, ...categoryTaskIds].every((taskId) =>
         currentTaskIds.includes(taskId)
       );
 
@@ -153,12 +177,18 @@ const CreateProject = () => {
       if (allSelected) {
         // If all tasks are selected, remove them all
         updatedTaskIds = currentTaskIds.filter(
-          (id) => !categoryTaskIds.includes(id)
+          //(id) => !categoryTaskIds.includes(id)
+          (id) => ![category.id, ...categoryTaskIds].includes(id)
         );
       } else {
         // Otherwise, add all missing tasks
         updatedTaskIds = [...currentTaskIds];
-        categoryTaskIds.forEach((taskId) => {
+        // categoryTaskIds.forEach((taskId) => {
+        //   if (!updatedTaskIds.includes(taskId)) {
+        //     updatedTaskIds.push(taskId);
+        //   }
+        // });
+        [category.id, ...categoryTaskIds].forEach((taskId) => {
           if (!updatedTaskIds.includes(taskId)) {
             updatedTaskIds.push(taskId);
           }
@@ -296,9 +326,9 @@ const CreateProject = () => {
         Create a New Project
       </h2>
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-6 gap-8">
           {/* Left side - Project details */}
-          <div className="bg-gray-100 p-6 rounded-lg col-span-1 w-full">
+          <div className="bg-gray-100 p-6 rounded-lg col-span-3 w-full">
             <h3 className="text-lg font-semibold mb-4">
               1️⃣ Start with the basics
             </h3>
@@ -441,39 +471,41 @@ const CreateProject = () => {
           </div>
 
           {/* Right side - Tasks */}
-          <div className="bg-gray-100 p-6 rounded-lg col-span-1 w-full">
-            <h3 className="font-bold mb-6">2️⃣ Choose tasks</h3>
-            {tasks.map((category) => (
-              <div key={category.id} className="mb-6">
-                <input
-                  type="checkbox"
-                  checked={
-                    category.children.length > 0 &&
-                    category.children.every((task) =>
-                      projectData.task_ids.includes(task.id)
-                    )
-                  }
-                  onChange={() => handleCategorySelection(category.id)}
-                />
-                <label className="ml-2 font-semibold">{category.name}</label>
-                <div className="ml-4">
-                  {category.children.map((task) => (
-                    <div key={task.id}>
-                      <input
-                        type="checkbox"
-                        checked={
-                          projectData.task_ids.includes(task.id) || false
-                        }
-                        onChange={() =>
-                          handleTaskSelection(category.id, task.id)
-                        }
-                      />
-                      <label className="ml-2">{task.name}</label>
-                    </div>
-                  ))}
+          <div className="bg-gray-100 p-6 rounded-lg col-span-3 w-full ">
+            <h3 className="font-bold mb-6 text-lg">2️⃣ Choose tasks</h3>
+            <div className="flex flex-wrap justify-between max-w-[600px] gap-4 min-h-[300px]">
+              {tasks.map((category) => (
+                <div key={category.id} className="mb-6 w-56">
+                  <input
+                    type="checkbox"
+                    checked={
+                      category.children.length > 0 &&
+                      category.children.every((task) =>
+                        projectData.task_ids.includes(task.id)
+                      )
+                    }
+                    onChange={() => handleCategorySelection(category.id)}
+                  />
+                  <label className="ml-2 font-semibold">{category.name}</label>
+                  <div className="ml-4">
+                    {category.children.map((task) => (
+                      <div key={task.id}>
+                        <input
+                          type="checkbox"
+                          checked={
+                            projectData.task_ids.includes(task.id) || false
+                          }
+                          onChange={() =>
+                            handleTaskSelection(category.id, task.id)
+                          }
+                        />
+                        <label className="ml-2">{task.name}</label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
             <div>
               <p>*To customize tasks, please go to the project details page.</p>
             </div>
