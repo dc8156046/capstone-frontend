@@ -2,12 +2,12 @@
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import React, { useState, useEffect } from "react";
-import { Calendar } from "react-calendar"; // Ensure react-calendar is installed
+import { Calendar } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { projectAPI } from "@/services/createProject";
 
 const CreateProject = () => {
-  // State declarations
+  const [step, setStep] = useState(1);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(
     new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
@@ -35,17 +35,6 @@ const CreateProject = () => {
       const response = await projectAPI.getAllTasks();
       if (response && Array.isArray(response)) {
         setTasks(response);
-
-        // Initialize tasks object structure based on categories from API
-        const initialTasksState = {};
-        response.forEach((category) => {
-          initialTasksState[category.id] = [];
-        });
-
-        setProjectData((prev) => ({
-          ...prev,
-          tasks: initialTasksState,
-        }));
       } else {
         setTasks([]);
       }
@@ -58,17 +47,12 @@ const CreateProject = () => {
   // Fetch cities based on the selected province
   const fetchCitiesForProvince = async (province_id) => {
     try {
-      // Use an updated API call that supports filtering by province
       const citiesResponse = await projectAPI.getCitiesByProvince(province_id);
-
       if (citiesResponse && Array.isArray(citiesResponse)) {
         setCities(citiesResponse);
-
-        // Set default city if available
         if (citiesResponse.length > 0) {
           setProjectData((prev) => ({ ...prev, city: citiesResponse[0].id }));
         } else {
-          // Clear city if no cities available
           setProjectData((prev) => ({ ...prev, city: 0 }));
         }
       } else {
@@ -82,20 +66,15 @@ const CreateProject = () => {
     }
   };
 
-  // Fetch provinces first, then cities based on selected province
+  // Fetch provinces and cities
   const fetchLocations = async () => {
     try {
-      // Fetch provinces
       const provincesResponse = await projectAPI.getAllProvinces();
       if (provincesResponse && Array.isArray(provincesResponse)) {
         setProvinces(provincesResponse);
-
-        // Set default province if available
         if (provincesResponse.length > 0) {
           const defaultProvince = provincesResponse[0].id;
           setProjectData((prev) => ({ ...prev, province: defaultProvince }));
-
-          // Fetch cities for the default province
           await fetchCitiesForProvince(defaultProvince);
         }
       }
@@ -107,7 +86,6 @@ const CreateProject = () => {
     }
   };
 
-  // Load data on component mount
   useEffect(() => {
     fetchTasks();
     fetchLocations();
@@ -117,45 +95,33 @@ const CreateProject = () => {
   const handleTaskSelection = (categoryId, taskId) => {
     setProjectData((prevData) => {
       const currentTaskIds = [...(prevData.task_ids || [])];
-
-      // Check if the task is already selected
       const taskIndex = currentTaskIds.indexOf(taskId);
-
-      // If task is already selected, remove it, otherwise add it
       if (taskIndex !== -1) {
         currentTaskIds.splice(taskIndex, 1);
       } else {
         currentTaskIds.push(taskId);
       }
-
       const category = tasks.find((cat) => cat.id === categoryId);
       if (!category) return prevData;
 
       const categoryTaskIds = category.children.map((task) => task.id);
-
-      // Check if any task in the category is selected
       const anyTaskSelected = categoryTaskIds.some((id) =>
         currentTaskIds.includes(id)
       );
 
       if (anyTaskSelected) {
-        // If at least one task is selected, ensure categoryId is also selected
         if (!currentTaskIds.includes(category.id)) {
           currentTaskIds.push(category.id);
         }
       } else {
-        // If no task is selected, remove categoryId from the list
         currentTaskIds = currentTaskIds.filter((id) => id !== category.id);
       }
 
-      return {
-        ...prevData,
-        task_ids: currentTaskIds,
-      };
+      return { ...prevData, task_ids: currentTaskIds };
     });
   };
 
-  // Handle category selection (select/deselect all tasks in a category)
+  // Handle category selection
   const handleCategorySelection = (categoryId) => {
     const category = tasks.find((cat) => cat.id === categoryId);
     if (!category) return;
@@ -163,31 +129,17 @@ const CreateProject = () => {
     setProjectData((prevData) => {
       const currentTaskIds = [...(prevData.task_ids || [])];
       const categoryTaskIds = category.children.map((task) => task.id);
-
-      // Check if all category tasks are already selected
-      // const allSelected = categoryTaskIds.every((taskId) =>
-      //   currentTaskIds.includes(taskId)
-      // );
-
       const allSelected = [category.id, ...categoryTaskIds].every((taskId) =>
         currentTaskIds.includes(taskId)
       );
 
       let updatedTaskIds;
       if (allSelected) {
-        // If all tasks are selected, remove them all
         updatedTaskIds = currentTaskIds.filter(
-          //(id) => !categoryTaskIds.includes(id)
           (id) => ![category.id, ...categoryTaskIds].includes(id)
         );
       } else {
-        // Otherwise, add all missing tasks
         updatedTaskIds = [...currentTaskIds];
-        // categoryTaskIds.forEach((taskId) => {
-        //   if (!updatedTaskIds.includes(taskId)) {
-        //     updatedTaskIds.push(taskId);
-        //   }
-        // });
         [category.id, ...categoryTaskIds].forEach((taskId) => {
           if (!updatedTaskIds.includes(taskId)) {
             updatedTaskIds.push(taskId);
@@ -195,14 +147,11 @@ const CreateProject = () => {
         });
       }
 
-      return {
-        ...prevData,
-        task_ids: updatedTaskIds,
-      };
+      return { ...prevData, task_ids: updatedTaskIds };
     });
   };
 
-  // Handle cancel button
+  // Handle cancel
   const handleCancel = () => {
     const confirmCancel = window.confirm("Are you sure you want to cancel?");
     if (confirmCancel) {
@@ -213,18 +162,13 @@ const CreateProject = () => {
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    // Skip province and city as they are handled by specific functions
     if (name === "province" || name === "city") return;
-
     setProjectData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleProvinceChange = async (e) => {
     const provinceId = e.target.value;
     setProjectData((prev) => ({ ...prev, province: provinceId }));
-
-    // Fetch cities for the selected province
     await fetchCitiesForProvince(provinceId);
   };
 
@@ -233,7 +177,6 @@ const CreateProject = () => {
     setProjectData((prev) => ({ ...prev, city: cityId }));
   };
 
-  // Handle date changes
   const handleDateChange = (date) => {
     setStartDate(date);
     setEndDate(
@@ -246,18 +189,14 @@ const CreateProject = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Form validation
     if (!projectData.name || projectData.name.trim() === "") {
       toast.error("Project Name cannot be empty.");
       return;
     }
-
     if (!projectData.address || projectData.address.trim() === "") {
       toast.error("Project Address cannot be empty.");
       return;
     }
-
     if (
       !projectData.budget ||
       isNaN(parseFloat(projectData.budget)) ||
@@ -267,10 +206,8 @@ const CreateProject = () => {
       return;
     }
 
-    // If all checks pass, proceed to API call
     try {
       setIsSubmitting(true);
-      // Create a formatted payload object
       const payload = {
         name: projectData.name,
         address: projectData.address,
@@ -284,33 +221,44 @@ const CreateProject = () => {
       };
 
       console.log("Payload:", payload);
-      // Make API call to create project
       const response = await projectAPI.createProject(payload);
-      // Handle successful response
       toast.success("Project created successfully!");
       console.log("Project created:", response.data);
-
-      // Redirect to the project details page or dashboard
       setTimeout(() => {
-        // window.location.href = `/projects/${response.data.id}`;
+        window.location.href = "/dashboard";
       }, 2000);
     } catch (error) {
-      // Handle API errors
       console.error("Error creating project:", error);
-
-      if (error.response) {
-        const errorMessage =
-          error.response.data.message ||
-          "Failed to create project. Please try again.";
-        toast.error(errorMessage);
-      } else if (error.request) {
-        toast.error("No response from server. Please check your connection.");
-      } else {
-        toast.error("Error setting up request. Please try again.");
-      }
+      toast.error("Failed to create project. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Handle Next button
+  const handleNext = () => {
+    if (!projectData.name || projectData.name.trim() === "") {
+      toast.error("Project Name cannot be empty.");
+      return;
+    }
+    if (!projectData.address || projectData.address.trim() === "") {
+      toast.error("Project Address cannot be empty.");
+      return;
+    }
+    if (
+      !projectData.budget ||
+      isNaN(parseFloat(projectData.budget)) ||
+      parseFloat(projectData.budget) < 0
+    ) {
+      toast.error("Budget must be a positive number.");
+      return;
+    }
+    setStep(2);
+  };
+
+  // Handle Back button
+  const handleBack = () => {
+    setStep(1);
   };
 
   if (loading) {
@@ -323,12 +271,12 @@ const CreateProject = () => {
     <div>
       <ToastContainer />
       <h2 className="text-2xl font-bold text-center mb-6">
-        Create a New Project
+        Create a New Project (Step {step} of 2)
       </h2>
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-6 gap-8">
-          {/* Left side - Project details */}
-          <div className="bg-gray-100 p-6 rounded-lg col-span-3 w-full">
+        {/* Step 1: Basic Information */}
+        {step === 1 && (
+          <div className="bg-gray-100 p-6 rounded-lg w-full max-w-2xl mx-auto">
             <h3 className="text-lg font-semibold mb-4">
               1️⃣ Start with the basics
             </h3>
@@ -468,14 +416,33 @@ const CreateProject = () => {
                 />
               </div>
             </div>
-          </div>
 
-          {/* Right side - Tasks */}
-          <div className="bg-gray-100 p-6 rounded-lg col-span-3 w-full ">
+            <div className="flex justify-end space-x-4 mt-6">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="bg-gray-500 text-white px-6 py-2 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleNext}
+                className="bg-blue-500 text-white px-6 py-2 rounded"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Task Selection */}
+        {step === 2 && (
+          <div className="bg-gray-100 p-6 rounded-lg w-full max-w-2xl mx-auto">
             <h3 className="font-bold mb-6 text-lg">2️⃣ Choose tasks</h3>
-            <div className="flex flex-wrap justify-between max-w-[600px] gap-4 min-h-[300px]">
+            <div className="grid grid-cols-2 gap-4 max-w-[600px] p-4 min-h-[300px]">
               {tasks.map((category) => (
-                <div key={category.id} className="mb-6 w-56">
+                <div key={category.id} className="mb-6">
                   <input
                     type="checkbox"
                     checked={
@@ -509,25 +476,25 @@ const CreateProject = () => {
             <div>
               <p>*To customize tasks, please go to the project details page.</p>
             </div>
-          </div>
-        </div>
 
-        <div className="flex justify-end space-x-4 mt-6">
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="bg-gray-500 text-white px-6 py-2 rounded"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-blue-500 text-white px-6 py-2 rounded"
-          >
-            {isSubmitting ? "Creating..." : "Create"}
-          </button>
-        </div>
+            <div className="flex justify-end space-x-4 mt-6">
+              <button
+                type="button"
+                onClick={handleBack}
+                className="bg-gray-500 text-white px-6 py-2 rounded"
+              >
+                Back
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-blue-500 text-white px-6 py-2 rounded"
+              >
+                {isSubmitting ? "Creating..." : "Create"}
+              </button>
+            </div>
+          </div>
+        )}
       </form>
     </div>
   );

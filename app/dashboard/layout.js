@@ -34,7 +34,7 @@ export default function DashboardLayout({ children }) {
         </aside>
 
         {/* Main content area */}
-        <main className="flex-1">
+        <main className="flex-1 bg-[#eef2f5]">
           <div className="container mx-auto py-6 px-4">{children}</div>
         </main>
       </div>

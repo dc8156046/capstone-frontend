@@ -44,9 +44,6 @@ export function UserNav() {
 
   const handleLogout = () => {
     try {
-      // localStorage.removeItem("token");
-      // localStorage.removeItem("username");
-      // localStorage.removeItem("email");
       if (typeof window !== "undefined") {
         localStorage.clear();
         document.cookie = "auth_token=; path=/; max-age=0;";

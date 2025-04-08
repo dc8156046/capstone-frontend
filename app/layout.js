@@ -1,3 +1,4 @@
+import { icons } from "lucide-react";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
