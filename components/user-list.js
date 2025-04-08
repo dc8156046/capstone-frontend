@@ -155,12 +155,12 @@ export default function UserList() {
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="py-4">
+      <CardHeader className="flex flex-row items-center justify-between ">
         <CardTitle className="text-2xl">User Management</CardTitle>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
+            <Button className="flex items-center gap-2 w-36 hover:bg-[#227b94] bg-[#16325b]">
               <UserPlus className="h-4 w-4" />
               Add User
             </Button>
@@ -302,15 +302,15 @@ export default function UserList() {
           <div className="rounded-md border">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="border-b bg-muted/50">
+                <thead className="border-b ">
                   <tr>
-                    <th className="py-3 px-4 text-left font-medium">
+                    <th className="py-3 px-4 text-left font-semibold">
                       First Name
                     </th>
-                    <th className="py-3 px-4 text-left font-medium">
+                    <th className="py-3 px-4 text-left font-semibold">
                       Last Name
                     </th>
-                    <th className="py-3 px-4 text-left font-medium">Email</th>
+                    <th className="py-3 px-4 text-left font-semibold">Email</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -37,7 +37,7 @@ export default function ProjectListPage() {
 
       <div className="border border-gray-300 rounded-lg bg-white mt-6 shadow-md">
         <div className="grid grid-cols-6 gap-4 border-b p-3 mt-4 text-center ">
-          <div className="font-semibold">Projects</div>
+          <div className="font-semibold">Name</div>
           <div className="font-semibold">Address</div>
           <div className="font-semibold">Start Date</div>
           <div className="font-semibold">Due Date</div>
