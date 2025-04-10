@@ -1127,7 +1127,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
   }
 
   return (
-    <div className="mx-auto py-6 space-y-6 px-4">
+    <div className=" py-6 space-y-6 px-4 max-w-[1450px]">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-[#444444]">Task Details</h2>
         <Button

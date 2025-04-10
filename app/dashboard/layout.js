@@ -7,7 +7,7 @@ import { Footer } from "@/components/footer";
 import { CircleHelp } from "lucide-react";
 export default function DashboardLayout({ children }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col ">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center px-4">
@@ -27,14 +27,14 @@ export default function DashboardLayout({ children }) {
       </header>
 
       {/* Main content */}
-      <div className="flex-1 flex">
+      <div className="flex-1 flex ">
         {/* Sidebar */}
         <aside className="hidden md:flex max-w-56 flex-shrink-0 border-r bg-background">
           <Sidebar />
         </aside>
 
         {/* Main content area */}
-        <main className="flex-1 bg-[#eef2f5]">
+        <main className="flex-1 bg-[#eef2f5] max-w-[1450px]">
           <div className="container mx-auto py-6 px-4">{children}</div>
         </main>
       </div>
