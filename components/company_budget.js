@@ -1,24 +1,3 @@
-// import * as React from "react";
-// import { PieChart } from "@mui/x-charts/PieChart";
-
-// export default function ProjectsBudget() {
-//   return (
-//     <PieChart
-//       series={[
-//         {
-//           data: [
-//             { id: 0, value: 10000, label: "Project A", color: "#227B94" },
-//             { id: 1, value: 15000, label: "Project B", color: "#5CB5D9" },
-//             { id: 2, value: 20000, label: "Project C", color: "#EAB308" },
-//           ],
-//         },
-//       ]}
-//       width={500}
-//       height={250}
-//     />
-//   );
-// }
-
 "use client";
 import * as React from "react";
 import { useState, useEffect } from "react";
@@ -27,6 +6,7 @@ import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import Typography from "@mui/material/Typography";
+import { apiService } from "@/services/http"; // Update this path to match your project structure
 
 export default function ProjectsBudget() {
   const [projects, setProjects] = useState([]);
@@ -47,24 +27,16 @@ export default function ProjectsBudget() {
     const fetchBudgetData = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/analytics/budget", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          // Add any required request body here
-          body: JSON.stringify({}),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
+        
+        // Call the specific analytics/budget endpoint
+        const data = await apiService.post('/analytics/budget', {});
+        console.log("Fetched budget data:", data);
+        
         setProjects(data);
         setLoading(false);
       } catch (err) {
-        setError(err.message);
+        console.error("Error fetching budget data:", err);
+        setError(err.message || "Failed to load budget data");
         setLoading(false);
       }
     };
@@ -77,23 +49,18 @@ export default function ProjectsBudget() {
     return projects
       .map((project, index) => ({
         id: index,
-        value: project.actual_budget,
-        label: project.name,
-        color: colors[index % colors.length], // Cycle through colors
+        value: project.actual_budget || 0,
+        label: project.name || `Project ${index + 1}`,
+        color: colors[index % colors.length],
       }))
-      .filter((item) => item.value > 0); // Only include projects with actual budget > 0
-  };
-
-  // Calculate total budget for the summary
-  const getTotalBudget = () => {
-    return projects.reduce((sum, project) => sum + project.actual_budget, 0);
+      .filter((item) => item.value > 0);
   };
 
   // Format currency for display
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: "CAD",
       maximumFractionDigits: 0,
     }).format(value);
   };
@@ -114,7 +81,7 @@ export default function ProjectsBudget() {
     );
   }
 
-  if (projects.length === 0) {
+  if (!projects || projects.length === 0) {
     return (
       <Box sx={{ p: 2 }}>
         <Alert severity="info">No project budget data available</Alert>
@@ -131,6 +98,10 @@ export default function ProjectsBudget() {
       </Box>
     );
   }
+
+  // Calculate totals directly from the projects array
+  const totalActualBudget = projects.reduce((sum, project) => sum + (project.actual_budget || 0), 0);
+  const totalEstimatedBudget = projects.reduce((sum, project) => sum + (project.estimate_budget || 0), 0);
 
   return (
     <Box sx={{ width: "100%", maxWidth: 600 }}>
@@ -160,9 +131,12 @@ export default function ProjectsBudget() {
         }}
       />
 
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 3 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-          Total Budget: {formatCurrency(getTotalBudget())}
+          Total Actual Budget: {formatCurrency(totalActualBudget)}
+        </Typography>
+        <Typography variant="subtitle1" sx={{ mt: 1 }}>
+          Total Estimated Budget: {formatCurrency(totalEstimatedBudget)}
         </Typography>
       </Box>
     </Box>

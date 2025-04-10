@@ -1,16 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import CompanyBudget from "@/components/company_budget";
 import AllProject from "@/components/all_budget";
-// import CategoryBudget from "@/components/analysis/category_budget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AnalyticsPage() {
@@ -22,7 +14,7 @@ export default function AnalyticsPage() {
       <div>
         <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
         <p className="text-muted-foreground mt-1">
-          Overview of all projects and individual project details
+          Overview of all projects budgets
         </p>
       </div>
 
@@ -34,7 +26,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg font-bold text-[#444444]">
-                Projects Duration Comparison
+                Projects Budget Overview
               </CardTitle>
             </CardHeader>
             <CardContent>

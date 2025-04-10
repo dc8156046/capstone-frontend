@@ -27,4 +27,7 @@ export const projectAPI = {
   
   completeProject: (projectId) => 
     apiService.put(`/projects/${projectId}/complete`),
+
+  //Get project budget data for analytics
+  getBudgetAnalytics: () => apiService.post(`/analytics/budget`, {})
 };
