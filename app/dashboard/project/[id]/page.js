@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Gantt, ViewMode } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
-import TaskDetailsTable1 from "@/components/task_details/task_details_table_1";
+import TaskDetailsTable1 from "@/components/task_details/task_details_table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
