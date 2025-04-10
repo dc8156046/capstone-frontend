@@ -99,30 +99,6 @@ export function TaskDetailsTable1({ projectId, projectData }) {
         if (projectData && Array.isArray(projectData.tasks)) {
           console.log("All tasks:", projectData.tasks);
 
-          /* const availableTaskIds = new Set();
-          projectData.tasks.forEach(({ task }) => {
-            if (task && task.id) {
-              availableTaskIds.add(task.id);
-            }
-          });
-          console.log("Available tasks:", Array.from(availableTaskIds));
-
-          const missingParentIds = new Set();
-          projectData.tasks.forEach(({ task }) => {
-            if (
-              task &&
-              task.parent_id &&
-              task.parent_id !== 0 &&
-              !availableTaskIds.has(task.parent_id)
-            ) {
-              missingParentIds.add(task.parent_id);
-            }
-          });
-
-          if (missingParentIds.size > 0) {
-            console.warn("Missing parent :", Array.from(missingParentIds));
-          } */
-
           const taskMap = new Map();
           const rootTasks = [];
 
@@ -135,11 +111,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
               );
               return;
             }
-            /* const isRootTask =
-              task.parent_id === 0 ||
-              task.parent_id === "0" ||
-              !availableTaskIds.has(task.parent_id);
- */
+
             const formattedTask = {
               id: task.id,
               name: task.name,
@@ -612,9 +584,6 @@ export function TaskDetailsTable1({ projectId, projectData }) {
               </span>
             </div>
           </TableCell>
-          {/* <TableCell className="border-r border-black/5 text-center">
-            {renderEditableCell(task, "dependence")}
-          </TableCell> */}
           <TableCell className="border-r border-black/5 text-center">
             {renderEditableCell(task, "assignTo")}
           </TableCell>
@@ -692,11 +661,8 @@ export function TaskDetailsTable1({ projectId, projectData }) {
   // API-integrated update task
   const handleUpdateTask = async (taskId, updates) => {
     try {
-      setTasks((prevTasks) => updateTaskLocally(prevTasks, taskId, updates));
-      const task = getAllTasks.find((t) => t.id === taskId);
-      if (!task) {
-        throw new Error("Task not found");
-      }
+      const task = await taskDetailAPI.getTaskDetail(projectId, taskId);
+      console.log(`task detail: ${task}`);
       const apiUpdates = {
         task_id: taskId,
         assignee_id: task.assignTo || null,
@@ -766,6 +732,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
       console.log("project id:", projectId);
       console.log("Sending update request with data:", apiUpdates);
       await taskDetailAPI.updateTask(projectId, apiUpdates);
+      window.location.reload();
     } catch (error) {
       console.error("Failed to update task:", error);
       let errorMessage = "Failed to update task.";
@@ -787,16 +754,6 @@ export function TaskDetailsTable1({ projectId, projectData }) {
       });
     }
   };
-
-  // Local task update function
-  const updateTaskLocally = (tasks, taskId, updates) =>
-    tasks.map((task) => ({
-      ...task,
-      ...(task.id === taskId ? updates : {}),
-      children: task.children
-        ? updateTaskLocally(task.children, taskId, updates)
-        : [],
-    }));
 
   // API-integrated add task
   const handleAddTask = async (parentName, childrenNames, insertAfter) => {
@@ -892,23 +849,6 @@ export function TaskDetailsTable1({ projectId, projectData }) {
       );
       console.log("createSubtask response:", response);
 
-      /* if (response) {
-        const formattedSubtasks = response.map(({ task, project_task }) => ({
-          id: task.id,
-          name: task.name,
-          parentId: task.parent_id,
-          level: 1,
-          assignTo: project_task.assignee_id,
-          status: project_task.status,
-          dueDate: project_task.end_date
-            ? new Date(project_task.end_date)
-            : null,
-          budget: project_task.budget,
-          pay_due: project_task.amount_due,
-          dependence: project_task.dependency,
-          notes: project_task.notes,
-          children: [],
-        })); */
       if (response && Array.isArray(response)) {
         const formattedSubtasks = response.map((item, index) => {
           console.log("Processing subtask item:", item);
@@ -1154,21 +1094,11 @@ export function TaskDetailsTable1({ projectId, projectData }) {
   // Add notes to a task
   const handleAddNotes = async (taskId, notes) => {
     try {
-      console.log("Tasks state before adding notes:", tasks);
-      console.log("Looking for taskId:", taskId);
-      const taskExists = tasks.some(
-        (task) =>
-          task.id === taskId ||
-          (task.children && task.children.some((child) => child.id === taskId))
-      );
-      if (!taskExists) {
-        throw new Error("Task not found in current state");
-      }
-
       await handleUpdateTask(taskId, { notes });
+
       setNotesInput((prev) => {
         const updated = { ...prev };
-        delete updated[taskId];
+
         return updated;
       });
       toast({
@@ -1197,7 +1127,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
   }
 
   return (
-    <div className="mx-auto py-6 space-y-6 px-4">
+    <div className=" py-6 space-y-6 px-4 max-w-[1450px]">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-[#444444]">Task Details</h2>
         <Button
@@ -1216,9 +1146,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
                 <TableHead className="border-r-2 border-black/10 min-w-[150px] text-center">
                   Task
                 </TableHead>
-                {/* <TableHead className="border-r border-black/5 min-w-[150px] text-center">
-                  Dependence
-                </TableHead> */}
+
                 <TableHead className="border-r border-black/5 min-w-[120px] text-center">
                   Assign To
                 </TableHead>
