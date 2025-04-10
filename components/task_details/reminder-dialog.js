@@ -33,8 +33,8 @@ export default function ReminderDialog({
     company: "",
   });
   const { toast } = useToast();
-  console.log("projectId", projectId);
-  // 获取项目详情
+  // console.log("projectId", projectId);
+
   useEffect(() => {
     if (open && projectId) {
       const fetchProjectDetails = async () => {
@@ -108,7 +108,6 @@ ${projectDetails.company}`
 
     setIsSending(true);
     try {
-      // 准备邮件内容
       const emailContent = {
         title: subject,
         content: message,

@@ -328,7 +328,7 @@ const CreateProject = () => {
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-6 gap-8">
           {/* Left side - Project details */}
-          <div className="bg-gray-100 p-6 rounded-lg col-span-3 w-full">
+          <div className="bg-white p-6 rounded-xl col-span-3 w-full shadow-md">
             <h3 className="text-lg font-semibold mb-4">
               1️⃣ Start with the basics
             </h3>
@@ -337,7 +337,7 @@ const CreateProject = () => {
               type="text"
               required
               name="name"
-              className="w-full border rounded p-2 mb-4"
+              className="w-full border rounded border-gray-400 p-2 mb-4"
               value={projectData.name}
               onChange={handleInputChange}
             />
@@ -347,7 +347,7 @@ const CreateProject = () => {
               type="text"
               required
               name="address"
-              className="w-full border rounded p-2 mb-4"
+              className="w-full border border-gray-400 rounded p-2 mb-4"
               value={projectData.address}
               onChange={handleInputChange}
             />
@@ -357,7 +357,7 @@ const CreateProject = () => {
                 <label className="block mb-2">Province</label>
                 <select
                   name="province"
-                  className="w-full border rounded p-2"
+                  className="w-full border rounded border-gray-400 p-2"
                   value={projectData.province}
                   onChange={handleProvinceChange}
                 >
@@ -376,7 +376,7 @@ const CreateProject = () => {
                 <label className="block mb-2">City</label>
                 <select
                   name="city"
-                  className="w-full border rounded p-2"
+                  className="w-full border border-gray-400 rounded p-2"
                   value={projectData.city}
                   onChange={handleCityChange}
                   disabled={cities.length === 0}
@@ -438,7 +438,7 @@ const CreateProject = () => {
               required
               type="number"
               name="budget"
-              className="w-full border rounded p-2"
+              className="w-full border rounded border-gray-400 p-2"
               value={projectData.budget}
               onChange={handleInputChange}
             />
@@ -450,7 +450,7 @@ const CreateProject = () => {
                   type="text"
                   value={startDate.toLocaleDateString()}
                   readOnly
-                  className="w-full border rounded p-2 cursor-pointer"
+                  className="w-full border rounded p-2 cursor-pointer border-gray-400"
                   onClick={() => setShowStartCalendar(!showStartCalendar)}
                 />
                 {showStartCalendar && (
@@ -462,7 +462,7 @@ const CreateProject = () => {
                 <input
                   type="number"
                   name="duration"
-                  className="w-full border rounded p-2 mb-4"
+                  className="w-full border rounded p-2 mb-4 border-gray-400"
                   value={projectData.duration}
                   onChange={handleInputChange}
                 />
@@ -471,7 +471,7 @@ const CreateProject = () => {
           </div>
 
           {/* Right side - Tasks */}
-          <div className="bg-gray-100 p-6 rounded-lg col-span-3 w-full ">
+          <div className="bg-white shadow-md p-6 rounded-lg col-span-3 w-full ">
             <h3 className="font-bold mb-6 text-lg">2️⃣ Choose tasks</h3>
             <div className="flex flex-wrap justify-between max-w-[600px] gap-4 min-h-[300px]">
               {tasks.map((category) => (

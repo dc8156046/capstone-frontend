@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import EachProjectDuration from "@/components/analysis/each_project_duration";
 import ProjectsBudget from "@/components/analysis/projects_budget";
-import CategoryBudget from "@/components/analysis/category_budget";
+import CategoryBudget from "@/components/category_date1";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AnalyticsPage() {
