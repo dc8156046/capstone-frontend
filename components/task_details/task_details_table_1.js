@@ -492,7 +492,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
         return isEditing ? (
           <Input
             autoFocus
-            defaultValue={task[field]?.toString()}
+            defaultValue={task[field]?.toString() || ""}
             onBlur={(e) => {
               const value = Number.parseFloat(
                 e.target.value.replace(/[^0-9.-]+/g, "")
@@ -501,7 +501,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
               setEditingCell({});
             }}
             onChange={(e) => {
-              e.target.value = formatAmount(e.target.value);
+              e.target.value = e.target.value;
             }}
           />
         ) : (
@@ -612,9 +612,9 @@ export function TaskDetailsTable1({ projectId, projectData }) {
               </span>
             </div>
           </TableCell>
-          <TableCell className="border-r border-black/5 text-center">
+          {/* <TableCell className="border-r border-black/5 text-center">
             {renderEditableCell(task, "dependence")}
-          </TableCell>
+          </TableCell> */}
           <TableCell className="border-r border-black/5 text-center">
             {renderEditableCell(task, "assignTo")}
           </TableCell>
@@ -1216,9 +1216,9 @@ export function TaskDetailsTable1({ projectId, projectData }) {
                 <TableHead className="border-r-2 border-black/10 min-w-[150px] text-center">
                   Task
                 </TableHead>
-                <TableHead className="border-r border-black/5 min-w-[150px] text-center">
+                {/* <TableHead className="border-r border-black/5 min-w-[150px] text-center">
                   Dependence
-                </TableHead>
+                </TableHead> */}
                 <TableHead className="border-r border-black/5 min-w-[120px] text-center">
                   Assign To
                 </TableHead>

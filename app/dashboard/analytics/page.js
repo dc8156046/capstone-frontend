@@ -8,9 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import CompanyBudget from "@/components/analysis/company_budget";
-import AllProject from "@/components/analysis/all_project";
-import CategoryBudget from "@/components/analysis/category_budget";
+import CompanyBudget from "@/components/company_budget";
+import AllProject from "@/components/all_budget";
+// import CategoryBudget from "@/components/analysis/category_budget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AnalyticsPage() {
@@ -122,10 +122,10 @@ export default function AnalyticsPage() {
               </p>
             </CardHeader>
             <CardContent>
-              <CategoryBudget
+              {/* <CategoryBudget
                 title="Category Distribution"
                 selectedProject={selectedProject}
-              />
+              /> */}
             </CardContent>
           </Card>
 
