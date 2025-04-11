@@ -53,7 +53,7 @@ export function AddTaskDialog({ open, onOpenChange, onAddTask, projectId }) {
       try {
         const response = await taskDetailAPI.getCategory();
         const parentData = Array.isArray(response)
-          ? response.map((cat) => ({ id: cat.id, name: cat.name })) // 假设 API 返回 { id, name }
+          ? response.map((cat) => ({ id: cat.id, name: cat.name }))
           : [];
         console.log("Loaded parent options:", parentData);
         setParentOptions(parentData);
@@ -125,7 +125,6 @@ export function AddTaskDialog({ open, onOpenChange, onAddTask, projectId }) {
     };
   }, [selectedParentId, toast]);
 
-  // 处理表单提交
   const handleSubmit = async () => {
     if (!selectedParent) {
       toast({

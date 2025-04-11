@@ -85,14 +85,14 @@ export function TaskDetailsTable1({ projectId, projectData }) {
 
   // Fetch initial data
   useEffect(() => {
-    console.log("useEffect received projectId:", projectId);
+    // console.log("useEffect received projectId:", projectId);
     const fetchInitialData = async () => {
       try {
         setLoading(true);
         if (!projectId) {
           throw new Error("No projectId provided");
         }
-        console.log(`Fetching project details for projectId: ${projectId}`);
+        // console.log(`Fetching project details for projectId: ${projectId}`);
         const projectData = await taskDetailAPI.getProjectDetail(projectId);
         console.log("Project data received:", projectData);
 
@@ -131,8 +131,6 @@ export function TaskDetailsTable1({ projectId, projectData }) {
             };
             taskMap.set(task.id, formattedTask);
           });
-          console.log("Task map size:", taskMap.size);
-          console.log("Quantity for root tasks:", rootTasks.length);
 
           taskMap.forEach((task) => {
             if (task.parentId === 0 || task.parentId === "0") {
@@ -156,21 +154,6 @@ export function TaskDetailsTable1({ projectId, projectData }) {
             }
           });
 
-          /* const childTask = taskMap.get(task.id);
-            const parentTask = taskMap.get(task.parent_id);
-
-            if (childTask && parentTask) {
-              parentTask.children.push(childTask);
-              console.log(
-                ` ${childTask.id} has added to ${parentTask.id} as child`
-              );
-            } else {
-              console.warn(
-                `Parent task with ID ${task.parentId} not found for task ${task.id}`
-              );
-            }
-          }); */
-
           if (rootTasks.length === 0) {
             console.warn("No root task , adding all tasks as root tasks");
             taskMap.forEach((task) => {
@@ -179,19 +162,6 @@ export function TaskDetailsTable1({ projectId, projectData }) {
               rootTasks.push(task);
             });
           }
-          /* if (task.parentId === 0) {
-              rootTasks.push(task);
-            } else {
-              const parent = taskMap.get(task.parentId);
-              if (parent) {
-                parent.children.push(task);
-              } else {
-                console.warn(
-                  `Parent task with ID ${task.parentId} not found for task ${task.id}`
-                );
-              }
-            }
-          }); */
 
           const sortTasks = (taskArray) => {
             taskArray.sort((a, b) => a.sort_order - b.sort_order);
@@ -202,10 +172,6 @@ export function TaskDetailsTable1({ projectId, projectData }) {
             });
           };
           sortTasks(rootTasks);
-
-          console.log("Task map size:", taskMap.size);
-          console.log("Quantity for:", rootTasks.length);
-          console.log("Formatted tasks:", rootTasks);
 
           setTasks(rootTasks);
           if (rootTasks.length > 0) {
@@ -238,7 +204,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
                 : user.email,
             email: user.email,
           }));
-          console.log("Contractors data:", contractorsData);
+
           setContractors(contractorsData);
         } else {
           console.error("Invalid users data structure:", usersData);
@@ -306,9 +272,6 @@ export function TaskDetailsTable1({ projectId, projectData }) {
                 t.children?.some((child) => child.id === task.id)
               )?.assignTo
             : null);
-
-        /* console.log("Assignee for task", task.id, ":", assignee);
-        console.log("Contractors:", contractors); */
 
         return (
           <div className="flex items-center gap-2">
@@ -704,8 +667,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
       if (updates.duration !== undefined) {
         apiUpdates.duration = updates.duration;
       }
-      console.log("project id:", projectId);
-      console.log("Sending update request with data:", apiUpdates);
+
       await taskDetailAPI.updateTask(projectId, apiUpdates);
       window.location.reload();
     } catch (error) {
@@ -732,7 +694,6 @@ export function TaskDetailsTable1({ projectId, projectData }) {
 
   // API-integrated add task
   const handleAddTask = async (parentName, childrenNames, insertAfter) => {
-    console.log("handleAddTask called with projectId:", projectId);
     if (!projectId) {
       toast({
         title: "Error",
@@ -817,12 +778,10 @@ export function TaskDetailsTable1({ projectId, projectData }) {
         start_date: new Date().toISOString(),
       }));
 
-      console.log("Creating subtasks with data:", subtasksData);
       const response = await taskDetailAPI.createSubtask(
         parentTaskId,
         subtasksData
       );
-      console.log("createSubtask response:", response);
 
       if (response && Array.isArray(response)) {
         const formattedSubtasks = response.map((item, index) => {
@@ -1160,8 +1119,8 @@ export function TaskDetailsTable1({ projectId, projectData }) {
             </TableHeader>
             <TableBody>
               {tasks.length > 0 ? (
-                tasks.map((task, index) => (
-                  <React.Fragment key={index}>
+                tasks.map((task) => (
+                  <React.Fragment key={task.id}>
                     {renderTask(task)}
                   </React.Fragment>
                 ))
