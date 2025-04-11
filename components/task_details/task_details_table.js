@@ -475,6 +475,7 @@ export function TaskDetailsTable1({ projectId, projectData }) {
             onChange={(e) => {
               e.target.value = e.target.value;
             }}
+            className="max-w-[100px] px-2"
           />
         ) : (
           <div
@@ -483,32 +484,6 @@ export function TaskDetailsTable1({ projectId, projectData }) {
           >
             {task[field] ? formatAmount(task[field].toString()) : "-"}
           </div>
-        );
-
-      case "dependence":
-        return (
-          <Select
-            value={task.dependence}
-            onValueChange={(value) => {
-              handleUpdateTask(task.id, { dependence: value });
-            }}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select dependence">
-                {task.dependence ? getTaskNameById(task.dependence) : "None"}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="None">None</SelectItem>
-              {getAllTasks
-                .filter((t) => t.id !== task.id)
-                .map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.name}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
         );
 
       default:
@@ -555,8 +530,8 @@ export function TaskDetailsTable1({ projectId, projectData }) {
     return (
       <React.Fragment key={task.id}>
         <TableRow key={task.id}>
-          <TableCell className="font-medium border-r-2 border-black/10 text-center">
-            <div className="flex items-center space-x-2">
+          <TableCell className="font-medium border-r-2 border-black/10 text-center ">
+            <div className="flex items-center space-x-2 ">
               {hasChildren && (
                 <Button
                   variant="ghost"
@@ -593,10 +568,10 @@ export function TaskDetailsTable1({ projectId, projectData }) {
           <TableCell className="border-r border-black/5 text-center">
             {renderEditableCell(task, "dueDate")}
           </TableCell>
-          <TableCell className="border-r border-black/5 text-center">
+          <TableCell className="border-r border-black/5 text-center w-[120px]">
             {renderEditableCell(task, "budget")}
           </TableCell>
-          <TableCell className="border-r border-black/5 text-center">
+          <TableCell className="border-r border-black/5 text-center ">
             {renderEditableCell(task, "pay_due")}
           </TableCell>
           <TableCell className="border-r border-black/5 text-center relative group">
