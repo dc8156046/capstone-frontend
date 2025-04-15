@@ -257,7 +257,7 @@ export default function EachProjectBudget() {
             },
           },
         }}
-        margin={{ left: marginLeft, right: 20, top: 10, bottom: 30 }}
+        margin={{ left: marginLeft, right: 20, top: 60, bottom: 30 }}
         tooltip={{ trigger: "item" }}
       />
     </Box>

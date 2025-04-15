@@ -104,7 +104,7 @@ export default function ProjectsBudget() {
   const totalEstimatedBudget = projects.reduce((sum, project) => sum + (project.estimate_budget || 0), 0);
 
   return (
-    <Box sx={{ width: "100%", maxWidth: 600 }}>
+    <Box sx={{ width: "100%", maxWidth: 800, mx: "auto", display: "flex", flexDirection: "column", alignItems: "center", overflow: "visible" }}>
       <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
         Project Budget Allocation
       </Typography>
@@ -117,7 +117,12 @@ export default function ProjectsBudget() {
             innerRadius: 30,
             paddingAngle: 2,
             cornerRadius: 4,
-            valueFormatter: (value) => formatCurrency(value),
+            valueFormatter: (params) => {
+              console.log("valueFormatter params:", params);
+              if (typeof params?.value !== "number" || isNaN(params.value)) return "N/A";
+              return formatCurrency(params.value);
+            },
+            
           },
         ]}
         width={500}
@@ -125,10 +130,16 @@ export default function ProjectsBudget() {
         tooltip={{ trigger: "item" }}
         slotProps={{
           legend: {
-            hidden: false,
-            position: { vertical: "middle", horizontal: "right" },
+            position: {
+              vertical: "middle",
+              horizontal: "right",
+            },
+            direction: "column", 
+            itemGap: 12,
           },
+        
         }}
+        margin={{ right: 200 }}
       />
 
       <Box sx={{ mt: 3 }}>
